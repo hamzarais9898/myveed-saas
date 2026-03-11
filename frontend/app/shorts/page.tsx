@@ -685,7 +685,7 @@ function ShortsContent() {
 
                                                 <MusicSelector
                                                     selectedTrackId={backgroundMusic}
-                                                    onSelect={(id) => setBackgroundMusic(id)}
+                                                    onSelect={(track) => setBackgroundMusic(track?.id || null)}
                                                 />
                                             </div>
 
