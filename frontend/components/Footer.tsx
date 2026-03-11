@@ -159,7 +159,7 @@ export default function Footer() {
                                     whileHover={{ scale: 1.15, y: -5 }}
                                     whileTap={{ scale: 0.95 }}
                                     className={`w-11 h-11 bg-white border border-gray-100 rounded-2xl flex items-center justify-center text-gray-500 ${social.color} hover:text-white hover:border-transparent transition-all duration-300 shadow-sm shadow-gray-200/50 cursor-pointer`}
-                                    title={social.tooltip}
+                                    title={social.id}
                                 >
                                     {social.icon}
                                 </motion.a>
