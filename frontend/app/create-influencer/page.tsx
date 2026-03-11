@@ -690,7 +690,7 @@ export default function AIInfluencerPage() {
                         try {
                             const res = await influencerService.previewGenerateImage({
                                 gender, 
-                                hair: { color: hairColor, style: hairStyle, length: hairLength }, 
+                                hair: { color: hairColor, style: hairStyle, length: hairLength } as any, 
                                 skin: { tone: skinTone }, 
                                 eyes: { color: eyeColor }, 
                                 age,
@@ -717,7 +717,7 @@ export default function AIInfluencerPage() {
                                 avatarUrl: studioPreview, 
                                 skin: { tone: skinTone }, 
                                 eyes: { color: eyeColor }, 
-                                hair: { color: hairColor, style: hairStyle, length: hairLength }, 
+                                hair: { color: hairColor, style: hairStyle, length: hairLength } as any,                                
                                 status: status as any,
                                 config: { aesthetic } as any
                             });
