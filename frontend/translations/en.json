@@ -1,0 +1,683 @@
+{
+  "common": {
+    "login": "Login",
+    "startFree": "Start for Free",
+    "mySpace": "My Space",
+    "features": "Features",
+    "pricing": "Pricing",
+    "dashboard": "Dashboard",
+    "logout": "Logout",
+    "logoAlt": "MAVEED Logo",
+    "discover": "Discover",
+    "create": "Create",
+    "try": "Try",
+    "access": "Access",
+    "analyze": "Analyze",
+    "connect": "Connect",
+    "ok": "Ok",
+    "nav": {
+      "shorts": "MAVEED Shorts",
+      "generate": "Generate",
+      "tts": "Text to Speech",
+      "analytics": "Analytics",
+      "tiktok": "TikTok",
+      "subscriptions": "Subscriptions",
+      "admin": "Admin Dashboard",
+      "user": "User",
+      "stars": "Stars",
+      "profile": "My Profile",
+      "kpi": "Analytics & KPI",
+      "settings": "Settings",
+      "platforms": "Connect Platforms"
+    }
+  },
+  "hero": {
+    "badge": "1 prompt = 20 videos published on TikTok",
+    "title": "Create videos",
+    "tagline": "AI Video Automation",
+    "subtitle": "Publish a viral video on YouTube, TikTok, and Instagram in 1 click.",
+    "cta": "Try for free",
+    "ctaYouTube": "Or generate via YouTube link",
+    "viewFeatures": "View features",
+    "phrases": "automated,viral,professional,in bulk,on auto-pilot",
+    "stats": {
+      "videos": "Videos created",
+      "creators": "Active creators",
+      "satisfaction": "Satisfaction"
+    },
+    "quickPromptPlaceholder": "Write your video idea...",
+    "generateButton": "Generate Video/Image",
+    "placeholderExamples": [
+      "Moroccan woman speaking French...",
+      "Baby speaking Arabic like a 50-year-old man...",
+      "Motivational video Alex Hormozi style...",
+      "Cat dancing to techno...",
+      "Innovate with your creativity!"
+    ],
+    "noCardRequired": "*No credit card required"
+  },
+  "influencers": {
+    "title": "My Influencers",
+    "description": "Create and manage your own AI influencers to generate personalized videos",
+    "add": "Add AI Influencer",
+    "assets": "Assets",
+    "generateVideo": "Generate Video",
+    "studio": {
+      "title": "AI Creation Studio",
+      "subtitle": "Specify attributes to create a unique influencer",
+      "generate": "Generate via AI",
+      "saveDraft": "Save as Draft",
+      "viewDrafts": "View my Drafts",
+      "viewActive": "View my Influencers",
+      "nameLabel": "Influencer Name",
+      "namePlaceholder": "e.g., Chloe",
+      "ageLabel": "Age",
+      "previewEmpty": "Generated preview will appear here",
+      "filters": {
+        "all": "All",
+        "skin": "Skin",
+        "eyes": "Eyes",
+        "hair": "Hair",
+        "gender": "Gender"
+      },
+      "attributes": {
+        "gender": "Gender",
+        "skin": "Skin",
+        "eyes": "Eyes",
+        "hair": "Hair"
+      }
+    }
+  },
+  "features": {
+    "badge": "Features",
+    "title": "Everything you need",
+    "subtitle": "A complete suite of AI tools to create, automate, and analyze your video content",
+    "unlockAll": "Unlock all features",
+    "ytToShorts": {
+      "title": "YouTube to Shorts",
+      "description": "Transform any YouTube video into a viral TikTok Short in 1 click with 30 subtitle styles."
+    },
+    "influencers": {
+      "title": "AI Influencers",
+      "description": "Create and manage your own AI influencers to generate personalized videos"
+    },
+    "simulator": {
+      "title": "Revenue Simulator",
+      "description": "Estimate your potential earnings on YouTube and TikTok based on your views"
+    },
+    "goals": {
+      "title": "Goals",
+      "description": "Set challenges for yourself and track your progress to boost your motivation"
+    },
+    "tts": {
+      "title": "Text to Speech",
+      "description": "5 professional AI voices with 8 different speaking styles to create captivating voice-overs."
+    },
+    "subtitles": {
+      "title": "30 Subtitle Styles",
+      "description": "Choose from 30 animated subtitle templates to make your videos more engaging."
+    },
+    "promptToVideo": {
+      "title": "Prompt to Video",
+      "description": "Generate AI videos from simple text. Create 20 variations in YouTube and Shorts formats."
+    },
+    "analytics": {
+      "title": "Analytics Dashboard",
+      "description": "Track your performance on TikTok, Instagram, and YouTube with detailed charts."
+    },
+    "multiAccount": {
+      "title": "Scheduled Publishing",
+      "description": "Schedule your videos in advance and let MAVEED publish automatically across all your networks."
+    },
+    "stars": {
+      "title": "AI Stars",
+      "description": "Generate videos with AI avatars based on celebrities like Messi, Ronaldo, or characters"
+    },
+    "generate": {
+      "title": "Generate",
+      "description": "Create viral videos from a simple prompt. AI does all the work for you"
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "description": "Manage all your generated videos, download them and publish them to your networks"
+    },
+    "platforms": {
+      "tiktok": {
+        "tag": "Auto-Publish"
+      },
+      "instagram": {
+        "tag": "Reels Ready"
+      },
+      "youtube": {
+        "tag": "Shorts Optimized"
+      }
+    }
+  },
+  "connectivity": {
+    "badge": "AUTOMATION",
+    "title1": "PUBLISH EVERYWHERE,",
+    "title2": "AUTOMATICALLY",
+    "description": "With MAVEED, you no longer need to open each application. Schedule or publish in one click, and your videos are automatically broadcast on your networks."
+  },
+  "results": {
+    "title": "Concrete results",
+    "subtitle": "Discover how our users transform their views into real income.",
+    "item_title": "Result",
+    "item_subtitle": "TikTok Revenue & Influence"
+  },
+  "testimonials": {
+    "badge": "Customer Reviews",
+    "title": "They adopted MAVEED",
+    "subtitle": "Join thousands of creators who have revolutionized their video production.",
+    "button": "Give my opinion",
+    "note": "* Accessible to users who have generated at least 1 video",
+    "list": [
+      {
+        "id": 1,
+        "name": "Thomas R.",
+        "role": "Content Creator",
+        "image": "https://randomuser.me/api/portraits/men/32.jpg",
+        "content": "MAVEED has totally changed the way I work. My views exploded in less than 2 weeks.",
+        "country": "🇫🇷",
+        "rating": 5
+      },
+      {
+        "id": 2,
+        "name": "Léa M.",
+        "role": "Social Media Manager",
+        "image": "https://randomuser.me/api/portraits/women/44.jpg",
+        "content": "The AI is incredibly precise for cutting. The time gain is colossal for my clients.",
+        "country": "🇫🇷",
+        "rating": 5
+      },
+      {
+        "id": 3,
+        "name": "Sarah J.",
+        "role": "Influencer",
+        "image": "https://randomuser.me/api/portraits/women/28.jpg",
+        "content": "AI subtitles are a game changer. My engagement increased by 40% in a few days!",
+        "country": "🇺🇸",
+        "rating": 4
+      }
+    ],
+    "modal": {
+      "title": "Your opinion matters!",
+      "subtitle": "Share your experience with MAVEED",
+      "placeholder": "What did you think of the video creation?",
+      "error": "Please write a small comment.",
+      "submitting": "Sending...",
+      "submit": "Submit my opinion",
+      "success": "Thank you for your review! It will be visible after moderation. 🌟",
+      "eligibilityError": "You must have generated at least one video to give your opinion! 🎬"
+    }
+  },
+  "pricing": {
+    "title": "Simple and transparent pricing",
+    "subtitle": "Start for free, upgrade when you're ready",
+    "popular": "Most Popular",
+    "start": "Get Started",
+    "currency": "€",
+    "period": "per month",
+    "save": "Save 30%",
+    "annual": "Annual Discount",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "plans": {
+      "free": {
+        "name": "Free",
+        "description": "To discover the platform",
+        "priceMonthly": "0",
+        "priceYearly": "0",
+        "features": "30 Shorts credits per month,10 TTS credits,MAVEED Watermark"
+      },
+      "creator": {
+        "name": "Creator",
+        "description": "Perfect to start",
+        "priceMonthly": "5.99",
+        "priceYearly": "5.99",
+        "priceYearlyTotal": "70",
+        "features": "300 MAVEED Shorts credits per month,No watermark,60 Text to Speech credits,3 background music tracks,Prompt to Video (Veo3),Auto publish (Scheduling),Priority support"
+      },
+      "expert": {
+        "name": "Expert",
+        "description": "To go further",
+        "priceMonthly": "39",
+        "priceYearly": "39",
+        "priceYearlyTotal": "460",
+        "features": "All Creator features,600 MAVEED Shorts credits per month,120 Text to Speech credits,All background music tracks,Advanced analytics,Auto publish (Scheduling),Priority support"
+      },
+      "professional": {
+        "name": "Professional",
+        "description": "For agencies and businesses",
+        "priceMonthly": "89",
+        "priceYearly": "89",
+        "priceYearlyTotal": "1060",
+        "features": "All Expert features,Unlimited Auto publish,Unlimited MAVEED Shorts credits,Unlimited Text to Speech,White label option,Dedicated support,API access,Custom integrations"
+      }
+    }
+  },
+  "cta": {
+    "title": "Create viral videos with AI",
+    "subtitle": "Join thousands of creators using MAVEED to grow their audience.",
+    "button": "Start now"
+  },
+  "chatbot": {
+    "online": "Online to help you",
+    "welcome": "Hello! 👋 How can I help you?",
+    "question": "Do you want to transform a YouTube video into a viral Short?",
+    "action": "Yes, let's go!",
+    "register": "Register"
+  },
+  "footer": {
+    "tagline": "The #1 tool to automate your social media presence with artificial intelligence.",
+    "newsletter": "Newsletter",
+    "newsletter_placeholder": "your@email.com",
+    "product": "Product",
+    "resources": "Resources",
+    "legal": "Legal",
+    "copyright": "© 2026 MAVEED. Made with ❤️ for creators.",
+    "links": {
+      "shorts": "MAVEED Shorts",
+      "tts": "Text to Speech",
+      "ia": "Generative AI",
+      "pricing": "Pricing",
+      "faq": "Help Center (FAQ)",
+      "blog": "Blog & Tips",
+      "api": "API Documentation",
+      "support": "Support 24/7",
+      "terms": "Terms of Use",
+      "privacy": "Privacy Policy",
+      "legal": "Legal Notice"
+    }
+  },
+  "login": {
+    "welcome": "Welcome back! Log in to your account",
+    "createAccountTitle": "Create your account and start for free",
+    "noAccount": "Don't have an account?",
+    "createAccount": "Create an account",
+    "hasAccount": "Already have an account?",
+    "login": "Log in",
+    "acceptTerms": "By continuing, you agree to our",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "heroTitle": "Create viral videos in just a few clicks",
+    "heroSubtitle": "Transform your ideas into captivating TikTok and Shorts videos with AI",
+    "features": {
+      "ytToShorts": "YouTube to Shorts in 1 click",
+      "tts": "Text-to-Speech with 5 AI voices",
+      "captions": "30 animated subtitle styles",
+      "analytics": "Real-time analytics"
+    },
+    "form": {
+      "google": "Continue with Google",
+      "googleRegister": "Sign up with Google",
+      "or": "Or with email",
+      "email": "Email",
+      "emailPlaceholder": "name@example.com",
+      "password": "Password",
+      "passwordPlaceholder": "••••••••",
+      "confirmPassword": "Confirm Password",
+      "forgotPassword": "Forgot Password?",
+      "submitLogin": "Log In",
+      "submitRegister": "Create my account",
+      "connecting": "Connecting...",
+      "creating": "Creating...",
+      "passwordMismatch": "Passwords do not match",
+      "error": "An error occurred",
+      "googleError": "Google connection error",
+      "loginBtn": "Login",
+      "verifyTitle": "Verify your email",
+      "verifySubtitle": "We've sent a 6-digit code to",
+      "verifyPlaceholder": "000000",
+      "verifySubmit": "Verify Code",
+      "resendText": "Didn't receive the code?",
+      "resendBtn": "Resend",
+      "resendCountdown": "Resend in",
+      "resendSuccess": "New code sent",
+      "resendError": "Error while sending",
+      "verifyLabel": "6-digit code",
+      "verifySuccess": "Account activated successfully!",
+      "verifyError": "Incorrect or expired code",
+      "backToLogin": "Back"
+    },
+    "title": "Welcome Back!",
+    "subtitle": "Log in to your account to continue",
+    "registerLink": "Create an account",
+    "visualTag": "AI GENERATED VIDEO",
+    "visualText": "Create viral videos in just a few clicks",
+    "stats": {
+      "faster": "Faster",
+      "quality": "4K Quality"
+    },
+    "platforms": {
+      "title": "Platforms",
+      "subtitle": "Connect and manage your accounts across all networks",
+      "connect": {
+        "title": "Connections",
+        "tiktok": "TikTok",
+        "youtube": "YouTube",
+        "instagram": "Instagram",
+        "statusConnected": "Connected",
+        "statusDisconnected": "Not connected",
+        "connectBtn": "Connect",
+        "disconnectBtn": "Disconnect",
+        "addAccount": "Link an account"
+      },
+      "kpi": {
+        "title": "Performance Indicators (KPI)",
+        "followers": "Followers",
+        "views": "Views",
+        "engagement": "Engagement",
+        "totalVideos": "Videos"
+      },
+      "instructions": {
+        "title": "How to link your accounts?",
+        "step1": "Choose the platform you want to connect.",
+        "step2": "Follow the secure authorization instructions.",
+        "step3": "Once linked, your videos will be published automatically.",
+        "whyTitle": "Why link your accounts?",
+        "benefit1": "Automatic one-click publishing",
+        "benefit2": "Centralized multi-platform management",
+        "benefit3": "Real-time analytical tracking"
+      }
+    }
+  },
+  "profile": {
+    "title": "My Profile",
+    "subtitle": "Manage your personal information",
+    "name": "Full Name",
+    "email": "Email",
+    "city": "City",
+    "country": "Country",
+    "phone": "Phone Number",
+    "save": "Save Changes",
+    "success": "Profile updated successfully!",
+    "error": "Error updating profile",
+    "notEditable": "Not editable",
+    "subscription": {
+      "title": "Subscription",
+      "currentPlan": "Current Plan",
+      "trialCTA": "Upgrade to Premium",
+      "manage": "Manage my subscription"
+    }
+  },
+  "stars": {
+    "badge": "Become a Star",
+    "title": "Become",
+    "titleAccent": "Legendary",
+    "subtitle": "Choose a character, film yourself, and let AI work its magic.",
+    "step1": "Choose your character",
+    "step2": "Your Source Video",
+    "searchPlaceholder": "Search (ex: Messi, Batman...)",
+    "uploadCustom": "Import",
+    "importVideo": "Import a video",
+    "videoSpecs": "MP4, MOV (Max 100MB)",
+    "recordMe": "Film me",
+    "cameraLive": "Live Camera",
+    "previewPlaceholder": "Preview will appear here",
+    "transforming": "Transforming...",
+    "transformingSub": "Applying Veo3 deepfake",
+    "transformBtn": "TRANSFORM",
+    "download": "Download",
+    "publish": "Publish",
+    "subtitles": "Subtitles",
+    "music": "Music",
+    "retouch": "Retouch",
+    "categories": {
+      "sport": "Sport",
+      "anime": "Anime",
+      "celebrity": "Celebrity",
+      "politics": "Politics",
+      "superhero": "Superhero",
+      "disney": "Disney"
+    },
+    "customize": {
+      "title": "Customize your Avatar",
+      "subtitle": "Change style, gender or add magical details.",
+      "style": "Visual Style",
+      "gender": "Gender",
+      "male": "Male",
+      "female": "Female",
+      "promptLabel": "Magic Prompt",
+      "promptPlaceholder": "Ex: Playing golf, in a space suit...",
+      "updating": "Updating avatar...",
+      "reset": "Reset",
+      "styles": {
+        "original": "Original",
+        "cartoon": "Cartoon",
+        "robot": "Robot",
+        "gelaba": "Djellaba",
+        "human": "Realistic"
+      }
+    }
+  },
+  "shorts": {
+    "badge": "Creation Tool",
+    "title": "MAVEED",
+    "titleAccent": "Shorts",
+    "subtitle": "Publish a viral video on YouTube, TikTok, and Instagram in 1 click.",
+    "creditsLeft": "Remaining Shorts credits",
+    "creditsPerVideo": "10 credits per video",
+    "youtubeLink": "YouTube Link",
+    "youtubePlaceholder": "https://www.youtube.com/watch?v=...",
+    "analyze": "Analyze",
+    "livePreview": "LIVE PREVIEW",
+    "channel": "Channel",
+    "duration": "Duration",
+    "languages": "Languages",
+    "downloadOriginal": "Download original",
+    "passToAI": "Switch to AI (Vo3)",
+    "viralMoment": "Moment & Duration",
+    "startCursor": "Start",
+    "endCursor": "End",
+    "trimmerInstruction": "Use sliders to frame the viral moment",
+    "style": "Style",
+    "captionStyles": {
+      "classic": "Classic",
+      "hormozi": "Hormozi (Viral)",
+      "boxed": "Boxed (Clean)",
+      "none": "No subtitles"
+    },
+    "options": {
+      "blurredBackground": "Blurred Background",
+      "blackBars": "Black Bars"
+    },
+    "createBtn": "🎬 CREATE MY SHORT (10 credits)",
+    "generating": "Generating with AI...",
+    "success": "Congratulations!",
+    "viewDashboard": "View in my projects",
+    "howToUse": "How to use",
+    "stages": {
+      "analyzing": "Analyzing source video...",
+      "textures": "Generating 4K textures...",
+      "temporal": "Sora temporal optimization...",
+      "finalizing": "Finalizing HD render..."
+    },
+    "result": {
+      "ready": "Your Short is ready!",
+      "successTransform": "Transformation successful! 🚀✨",
+      "shareSuccess": "Shared to your socials!",
+      "saveDraft": "Save to Drafts",
+      "refuse": "Refuse",
+      "schedule": "Schedule Post"
+    },
+    "generationMode": {
+      "link": "Generate with Link",
+      "manual": "Manual Creation (AI)",
+      "promptPlaceholder": "Describe your short (e.g., A quick cooking recipe...)",
+      "bulk": "Generate 10 variants at once",
+      "remix": "Video Remix (Style Clone)",
+      "styleVariants": "Style Variants",
+      "addStyle": "Add Style Variant",
+      "stylePlaceholder": "e.g., European Style",
+      "videoSource": "Source Video",
+      "uploadText": "Drag or click to upload your source video"
+    },
+    "stars": {
+      "subtitles": "Subtitles",
+      "music": "Music",
+      "retouch": "AI Retouch",
+      "download": "Download",
+      "publish": "Share",
+      "ready": "4K Sora Video Ready!"
+    },
+    "drafts": {
+      "title": "My Drafts",
+      "subtitle": "Manage and schedule your generated videos",
+      "empty": "No drafts yet",
+      "publishNow": "Publish Now",
+      "scheduledFor": "Scheduled for: "
+    },
+    "steps": {
+      "step1": "Paste YouTube link",
+      "step2": "Frame viral moment",
+      "step3": "Add style (music, subtitles)",
+      "step4": "Let AI do the magic"
+    },
+    "aiPower": "AI Power",
+    "features": [
+      "30 animated subtitle styles",
+      "99% auto transcription",
+      "9:16 HD vertical format",
+      "Smart blurred background",
+      "Immersive background music"
+    ]
+  },
+  "generation": {
+    "title": "Generation Studio",
+    "videoPrefix": "Generate ",
+    "videoTitle": "Videos",
+    "imageTitle": "Images",
+    "videoSubtitle": "Transform your ideas into viral videos with subtitles and music in seconds.",
+    "imageSubtitle": "Create stunning images for covers or to animate into video.",
+    "modeVideo": "🎥 Video",
+    "modeImage": "🖼️ Image",
+    "describeStep": "1. Describe your {mode}",
+    "modeLabelVideo": "video",
+    "modeLabelImage": "image",
+    "imageSource": "Image Source",
+    "imageSourceDesc": "Selected image for animation",
+    "placeholderVideo": "Ex: A video showing a sunset on the beach with gentle waves...",
+    "placeholderImage": "Ex: A futuristic cyberpunk portrait, neon lighting, high definition...",
+    "recording": "RECORDING...",
+    "variants": "Number of variants",
+    "variantsDesc": "Number of unique versions based on your prompt.",
+    "duration": "Duration (seconds)",
+    "durationNote": "Note: Runway Gen-3 Turbo is optimized for 5s or 10s.",
+    "format": "Format",
+    "formatSquare": "Square (1:1)",
+    "formatLandscape": "Landscape (16:9)",
+    "quality": "Quality",
+    "qualityStandard": "Standard",
+    "qualityHD": "4K Ultra",
+    "imageCount": "Number of images",
+    "animatePrompt": "Animate this image cinematically...",
+    "voiceTooltip": "Use voice dictation",
+    "creativeStage": "Artistic Creation...",
+    "previewGenerated": "Generated Preview",
+    "previewSimDesc": "This is a simulation of your video. The final version will be in high quality.",
+    "subtitlePlaceholder": "Your subtitles will appear here...",
+    "edit": "Edit",
+    "launchProduction": "🚀 LAUNCH PRODUCTION",
+    "subtitleStudio": "Subtitle Studio",
+    "enable": "Enable",
+    "advanced": {
+      "title": "Advanced Customization",
+      "subtitle": "Add a specific visual style or background music",
+      "motionTitle": "Special Effects & Motion",
+      "configureMotion": "Configure Motion",
+      "reduce": "Reduce",
+      "tailImage": "Tail Image (Transition)",
+      "addTailImage": "Add ending image",
+      "tailImageDesc": "Create a perfect transition between two images",
+      "cameraControl": "Camera Control (Motion)",
+      "cameraNotice": "Note: Camera control is disabled if a tail image is selected."
+    },
+    "providers": {
+      "title": "AI Engine Selection",
+      "runway": {
+        "name": "Runway Gen-3",
+        "description": "The industry standard for photorealism and fluidity."
+      },
+      "sora": {
+        "name": "Sora (OpenAI)",
+        "description": "The world's most advanced engine for cinematic consistency and realism."
+      }
+    },
+    "results": "Results",
+    "animateImage": "Animate this image",
+    "download": "Download",
+    "emptyImages": "Your generated images will appear here",
+    "summary": "Summary",
+    "cost": "Cost",
+    "loading": "Loading...",
+    "previewButton": "PREVIEW",
+    "generateImageButton": "GENERATE IMAGE",
+    "packViral": "Viral Pack",
+    "extend": {
+      "button": "Extend (+5s)",
+      "confirm": "Do you want to extend this video by an additional 5 seconds? (15 credits will be deducted)",
+      "error": "Extension error",
+      "success": "Extension in progress..."
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Manage your generated content",
+    "trialTitle": "Use your free trial period",
+    "trialSubtitle": "Subscribe to a plan with 7 days free trial",
+    "trialCta": "Start Trial",
+    "stats": {
+      "total": "Total",
+      "videos": "Videos",
+      "photos": "Photos",
+      "scheduled": "Scheduled",
+      "published": "Published"
+    },
+    "tabs": {
+      "videos": "Videos",
+      "photos": "Photos"
+    },
+    "filters": {
+      "label": "Filters",
+      "all": "All",
+      "youtube": "YouTube",
+      "shorts": "Shorts",
+      "generated": "Generated",
+      "scheduled": "Scheduled",
+      "published": "Published"
+    },
+    "actions": {
+      "generate": "Generate",
+      "schedule": "Schedule",
+      "deleteAll": "Delete All",
+      "confirmDelete": "Are you sure you want to delete ALL your {type}? This action is irreversible.",
+      "typeVideos": "videos",
+      "typePhotos": "photos"
+    },
+    "pagination": {
+      "info": "{count} {type} • Page {page}/{total}"
+    },
+    "empty": {
+      "noVideos": "No videos",
+      "noPhotos": "No photos",
+      "noResults": "No results",
+      "videosCta": "Turn your ideas into viral content right now.",
+      "photosCta": "Generate stunning visuals with AI.",
+      "filterHint": "Try adjusting your filters to find what you're looking for.",
+      "generateVideo": "Generate a video",
+      "generatePhoto": "Generate an image"
+    }
+  },
+  "photoCard": {
+    "save": "Save",
+    "animate": "Animate",
+    "delete": "Delete"
+  },
+  "errors": {
+    "subscriptionRequired": "⚠️ Active subscription required. Please upgrade your plan to generate videos.",
+    "insufficientCredits": "⚠️ Insufficient credits. You need {needed} credits but only have {available} remaining.",
+    "failedToGenerate": "⚠️ Failed to generate video",
+    "general": "⚠️ An error occurred"
+  }
+}

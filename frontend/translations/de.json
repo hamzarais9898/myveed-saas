@@ -1,0 +1,397 @@
+{
+  "common": {
+    "login": "Anmelden",
+    "startFree": "Kostenlos starten",
+    "mySpace": "Mein Bereich",
+    "features": "Funktionen",
+    "pricing": "Preise",
+    "dashboard": "Dashboard",
+    "logout": "Abmelden",
+    "logoAlt": "MAVEED Logo",
+    "discover": "Entdecken",
+    "create": "Erstellen",
+    "try": "Probieren",
+    "access": "Zugreifen",
+    "analyze": "Analysieren",
+    "connect": "Verbinden",
+    "ok": "Verstanden",
+    "nav": {
+      "shorts": "MAVEED Shorts",
+      "generate": "Generieren",
+      "tts": "Text to Speech",
+      "analytics": "Analysen",
+      "tiktok": "TikTok",
+      "subscriptions": "Abonnements",
+      "admin": "Admin-Dashboard",
+      "user": "Benutzer",
+      "stars": "Stars",
+      "profile": "Mein Profil",
+      "kpi": "Analysen & KPI",
+      "settings": "Einstellungen"
+    }
+  },
+  "hero": {
+    "badge": "1 Prompt = 20 auf TikTok veröffentlichte Videos",
+    "title": "Videos erstellen",
+    "tagline": "KI-Video-Automatisierung",
+    "subtitle": "Veröffentlichen Sie ein virales Video auf YouTube, TikTok und Instagram mit 1 Klick.",
+    "cta": "Kostenlos ausprobieren",
+    "ctaYouTube": "Oder über YouTube-Link generieren",
+    "viewFeatures": "Funktionen anzeigen",
+    "phrases": "automatisiert,viral,professionell,in Masse,auf Autopilot",
+    "stats": {
+      "videos": "Erstellte Videos",
+      "creators": "Aktive Ersteller",
+      "satisfaction": "Zufriedenheit"
+    },
+    "quickPromptPlaceholder": "Schreiben Sie Ihre Video-Idee...",
+    "generateButton": "Video/Bild generieren",
+    "placeholderExamples": [
+      "Marokkanische Frau spricht Französisch...",
+      "Baby spricht Arabisch wie ein 50-jähriger Mann...",
+      "Motivationsvideo im Alex-Hormozi-Stil...",
+      "Katze tanzt zu Techno...",
+      "Innovieren Sie mit Ihrer Kreativität!"
+    ],
+    "noCardRequired": "*Keine Kreditkarte erforderlich"
+  },
+  "features": {
+    "badge": "Funktionen",
+    "title": "Alles, was Sie brauchen",
+    "subtitle": "Eine komplette Suite von KI-Tools zum Erstellen, Automatisieren und Analysieren Ihrer Videoinhalte",
+    "unlockAll": "Alle Funktionen freischalten",
+    "ytToShorts": {
+      "title": "YouTube zu Shorts",
+      "description": "Verwandeln Sie jedes YouTube-Video mit 1 Klick und 30 Untertitelstilen in einen viralen TikTok-Short."
+    },
+    "tts": {
+      "title": "Text to Speech",
+      "description": "5 professionelle KI-Stimmen mit 8 verschiedenen Sprechstilen zur Erstellung fesselnder Voice-Overs."
+    },
+    "subtitles": {
+      "title": "30 Untertitelstile",
+      "description": "Wählen Sie aus 30 animierten Untertitel-Vorlagen, um Ihre Videos ansprechender zu gestalten."
+    },
+    "promptToVideo": {
+      "title": "Prompt zu Video",
+      "description": "Generieren Sie KI-Videos aus einfachem Text. Erstellen Sie 20 Variationen in den Formaten YouTube und Shorts."
+    },
+    "analytics": {
+      "title": "Analyse-Dashboard",
+      "description": "Verfolgen Sie Ihre Leistung auf TikTok, Instagram und YouTube mit detaillierten Diagrammen."
+    },
+    "multiAccount": {
+      "title": "TikTok Multi-Accounts",
+      "description": "Verbinden Sie mehrere TikTok-Konten und veröffentlichen Sie gleichzeitig auf all Ihren Profilen."
+    },
+    "stars": {
+      "title": "KI-Stars",
+      "description": "Generieren Sie Videos mit KI-Avataren basierend auf Prominenten wie Messi, Ronaldo oder Charakteren"
+    },
+    "influencers": {
+      "title": "Meine Influencer",
+      "description": "Erstellen und verwalten Sie Ihre eigenen KI-Influencer, um personalisierte Videos zu generieren"
+    },
+    "generate": {
+      "title": "Generieren",
+      "description": "Erstellen Sie virale Videos aus einem einfachen Prompt. Die KI erledigt die ganze Arbeit für Sie"
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "description": "Verwalten Sie alle Ihre generierten Videos, laden Sie sie herunter und veröffentlichen Sie sie in Ihren Netzwerken"
+    },
+    "platforms": {
+      "tiktok": {
+        "tag": "Auto-Veröffentlichung"
+      },
+      "instagram": {
+        "tag": "Reels Fertig"
+      },
+      "youtube": {
+        "tag": "Shorts Optimiert"
+      }
+    }
+  },
+  "connectivity": {
+    "badge": "AUTOMATISIERUNG",
+    "title1": "ÜBERALL VERÖFFENTLICHEN,",
+    "title2": "AUTOMATISCH",
+    "description": "Mit MAVEED müssen Sie nicht mehr jede Anwendung einzeln öffnen. Planen oder veröffentlichen Sie mit einem Klick, und Ihre Videos werden automatisch auf Ihren Netzwerken geteilt."
+  },
+  "results": {
+    "title": "Konkrete Ergebnisse",
+    "subtitle": "Entdecken Sie, wie unsere Nutzer ihre Aufrufe in echtes Einkommen verwandeln.",
+    "item_title": "Ergebnis",
+    "item_subtitle": "TikTok-Einnahmen & Influencer"
+  },
+  "testimonials": {
+    "badge": "Kundenmeinungen",
+    "title": "Sie haben MAVEED adoptiert",
+    "subtitle": "Schließen Sie sich Tausenden von Erstellern an, die ihre Videoproduktion revolutioniert haben.",
+    "button": "Meine Meinung abgeben",
+    "note": "* Zugänglich für Benutzer, die mindestens 1 Video generiert haben",
+    "list": [
+      {
+        "id": 1,
+        "name": "Thomas R.",
+        "role": "Content Creator",
+        "image": "https://randomuser.me/api/portraits/men/32.jpg",
+        "content": "MAVEED hat meine Arbeitsweise total verändert. Meine Aufrufe sind in weniger als 2 Wochen explodiert.",
+        "country": "🇫🇷",
+        "rating": 5
+      },
+      {
+        "id": 2,
+        "name": "Léa M.",
+        "role": "Social Media Manager",
+        "image": "https://randomuser.me/api/portraits/women/44.jpg",
+        "content": "Die KI ist unglaublich präzise beim Schneiden. Der Zeitgewinn für meine Kunden ist kolossal.",
+        "country": "🇫🇷",
+        "rating": 5
+      },
+      {
+        "id": 3,
+        "name": "Sarah J.",
+        "role": "Influencerin",
+        "image": "https://randomuser.me/api/portraits/women/28.jpg",
+        "content": "KI-Untertitel sind ein Game Changer. Mein Engagement ist in wenigen Tagen um 40% gestiegen!",
+        "country": "🇺🇸",
+        "rating": 4
+      }
+    ],
+    "modal": {
+      "title": "Ihre Meinung zählt!",
+      "subtitle": "Teilen Sie Ihre Erfahrung mit MAVEED",
+      "placeholder": "Was dachten Sie über die Videoerstellung?",
+      "error": "Bitte schreiben Sie einen kleinen Kommentar.",
+      "submitting": "Wird gesendet...",
+      "submit": "Meine Meinung senden",
+      "success": "Vielen Dank für Ihre Bewertung! Sie wird nach der Moderation sichtbar sein. 🌟",
+      "eligibilityError": "Sie müssen mindestens ein Video generiert haben, um Ihre Meinung abzugeben! 🎬"
+    }
+  },
+  "pricing": {
+    "title": "Einfache und transparente Preise",
+    "subtitle": "Beginnen Sie kostenlos, führen Sie ein Upgrade durch, wenn Sie bereit sind",
+    "popular": "Am beliebtesten",
+    "start": "Jetzt starten",
+    "currency": "€",
+    "period": "pro Monat",
+    "save": "30% sparen",
+    "annual": "Jährlicher Rabatt",
+    "monthly": "Monatlich",
+    "yearly": "Jährlich",
+    "plans": {
+      "free": {
+        "name": "Kostenlos",
+        "description": "Um die Plattform zu entdecken",
+        "priceMonthly": "0",
+        "priceYearly": "0",
+        "features": "30 Shorts-Credits pro Monat,10 TTS-Credits,MAVEED Wasserzeichen"
+      },
+      "creator": {
+        "name": "Creator",
+        "description": "Perfekt für den Start",
+        "priceMonthly": "12.99",
+        "priceYearly": "12.99",
+        "priceYearlyTotal": "155",
+        "features": "3600 Credits pro Jahr für MAVEED Shorts*,720 TTS-Credits,+3 Hintergrundmusik,Prompt zu viralem Video,Zugang zu privatem Support,Auto-Veröffentlichung (Scheduling),Automatisches Veröffentlichen ⚡"
+      },
+      "expert": {
+        "name": "Experte",
+        "description": "Für mehr Möglichkeiten",
+        "priceMonthly": "27.99",
+        "priceYearly": "27.99",
+        "priceYearlyTotal": "335",
+        "features": "7200 Credits pro Jahr für MAVEED Shorts*,1400 TTS-Credits,Gesamte Hintergrundmusik,Prompt zu viralem Video,Zugang zu privatem Support,Auto-Veröffentlichung (Scheduling),Automatisches Veröffentlichen ⚡"
+      },
+      "professional": {
+        "name": "Professional",
+        "description": "Für Agenturen und Unternehmen",
+        "priceMonthly": "99.00",
+        "priceYearly": "99.00",
+        "priceYearlyTotal": "1188",
+        "features": "Unbegrenzte Credits, Unbegrenztes TTS, Unbegrenzte Auto-Veröffentlichung, 24/7 Priority Support, API-Zugriff, Alle zukünftigen Funktionen inbegriffen"
+      }
+    }
+  },
+  "cta": {
+    "title": "Virale Videos mit KI erstellen",
+    "subtitle": "Schließen Sie sich Tausenden von Erstellern an, die MAVEED nutzen, um ihr Publikum zu vergrößern.",
+    "button": "Jetzt starten"
+  },
+  "chatbot": {
+    "online": "Online, um Ihnen zu helfen",
+    "welcome": "Hallo! 👋 Wie kann ich Ihnen helfen?",
+    "question": "Möchten Sie ein YouTube-Video in einen viralen Short verwandeln?",
+    "action": "Ja, los geht's!",
+    "register": "Registrieren"
+  },
+  "footer": {
+    "tagline": "Das führende Tool zur Automatisierung Ihrer Social-Media-Präsenz mit künstlicher Intelligenz.",
+    "newsletter": "Newsletter",
+    "newsletter_placeholder": "ihre@email.com",
+    "product": "Produkt",
+    "resources": "Ressourcen",
+    "legal": "Rechtliches",
+    "copyright": "© 2026 MAVEED. Mit ❤️ für Ersteller gemacht.",
+    "links": {
+      "shorts": "MAVEED Shorts",
+      "tts": "Text to Speech",
+      "ia": "Generative KI",
+      "pricing": "Preise",
+      "faq": "Hilfecenter (FAQ)",
+      "blog": "Blog & Tipps",
+      "api": "API-Dokumentation",
+      "support": "24/7 Support",
+      "terms": "Nutzungsbedingungen",
+      "privacy": "Datenschutzrichtlinie",
+      "legal": "Impressum"
+    }
+  },
+  "login": {
+    "welcome": "Willkommen zurück! Melden Sie sich in Ihrem Konto an",
+    "createAccountTitle": "Erstellen Sie Ihr Konto und starten Sie kostenlos",
+    "noAccount": "Noch kein Konto?",
+    "createAccount": "Konto erstellen",
+    "hasAccount": "Bereits ein Konto?",
+    "login": "Anmelden",
+    "acceptTerms": "Durch Fortfahren akzeptieren Sie unsere",
+    "terms": "Nutzungsbedingungen",
+    "privacy": "Datenschutzbestimmungen",
+    "heroTitle": "Erstellen Sie virale Videos mit nur wenigen Klicks",
+    "heroSubtitle": "Verwandeln Sie Ihre Ideen mit KI in fesselnde TikTok- und Shorts-Videos",
+    "features": {
+      "ytToShorts": "YouTube zu Shorts mit 1 Klick",
+      "tts": "Text-to-Speech mit 5 KI-Stimmen",
+      "captions": "30 animierte Untertitel-Stile",
+      "analytics": "Echtzeit-Analysen"
+    },
+    "form": {
+      "google": "Mit Google fortfahren",
+      "googleRegister": "Mit Google registrieren",
+      "orEmail": "Oder mit E-Mail",
+      "email": "E-Mail",
+      "password": "Passwort",
+      "confirmPassword": "Passwort bestätigen",
+      "forgotPassword": "Passwort vergessen?",
+      "submitLogin": "Anmelden",
+      "submitRegister": "Mein Konto erstellen",
+      "connecting": "Verbindung wird hergestellt...",
+      "creating": "Wird erstellt...",
+      "passwordMismatch": "Passwörter stimmen nicht überein",
+      "error": "Ein Fehler ist aufgetreten",
+      "googleError": "Google-Verbindungsfehler"
+    }
+  },
+  "profile": {
+    "title": "Mein Profil",
+    "subtitle": "Verwalten Sie Ihre persönlichen Informationen",
+    "name": "Vollständiger Name",
+    "email": "E-Mail",
+    "city": "Stadt",
+    "country": "Land",
+    "phone": "Telefonnummer",
+    "save": "Änderungen speichern",
+    "success": "Profil erfolgreich aktualisiert!",
+    "error": "Fehler beim Aktualisieren des Profils",
+    "notEditable": "Nicht bearbeitbar",
+    "subscription": {
+      "title": "Abonnement",
+      "currentPlan": "Aktueller Plan",
+      "trialCTA": "Jetzt upgraden",
+      "manage": "Mein Abonnement verwalten"
+    }
+  },
+  "stars": {
+    "badge": "Werde ein Star",
+    "title": "Werde",
+    "titleAccent": "Legendär",
+    "subtitle": "Wähle einen Charakter, filme dich selbst und lass die KI ihre Magie wirken.",
+    "step1": "Wähle deinen Charakter",
+    "step2": "Dein Quellvideo",
+    "searchPlaceholder": "Suche (z.B. Messi, Batman...)",
+    "uploadCustom": "Importieren",
+    "importVideo": "Video importieren",
+    "videoSpecs": "MP4, MOV (Max. 100MB)",
+    "recordMe": "Mich filmen",
+    "cameraLive": "Live-Kamera",
+    "previewPlaceholder": "Vorschau wird hier angezeigt",
+    "transforming": "Transformiere...",
+    "transformingSub": "Veo3 Deepfake anwenden",
+    "transformBtn": "TRANSFORMIEREN",
+    "download": "Herunterladen",
+    "publish": "Veröffentlichen",
+    "subtitles": "Untertitel",
+    "music": "Musik",
+    "retouch": "Retusche",
+    "categories": {
+      "sport": "Sport",
+      "anime": "Anime",
+      "celebrity": "Promi",
+      "politics": "Politik",
+      "superhero": "Superheld",
+      "disney": "Disney"
+    }
+  },
+  "shorts": {
+    "badge": "Erstellungstool",
+    "title": "MAVEED",
+    "titleAccent": "Shorts",
+    "subtitle": "Veröffentliche ein virales Video auf YouTube, TikTok und Instagram mit einem Klick.",
+    "creditsLeft": "Verbleibende Shorts-Credits",
+    "creditsPerVideo": "10 Credits pro Video",
+    "youtubeLink": "YouTube-Link",
+    "youtubePlaceholder": "https://www.youtube.com/watch?v=...",
+    "analyze": "Analysieren",
+    "livePreview": "LIVE-VORSCHAU",
+    "channel": "Kanal",
+    "duration": "Dauer",
+    "languages": "Sprachen",
+    "downloadOriginal": "Original herunterladen",
+    "passToAI": "Zu KI (Vo3) wechseln",
+    "viralMoment": "Moment & Dauer",
+    "startCursor": "Beginn",
+    "endCursor": "Ende",
+    "trimmerInstruction": "Verwenden Sie die Schieberegler, um den viralen Moment einzurahmen",
+    "style": "Stil",
+    "captionStyles": {
+      "classic": "Klassisch",
+      "hormozi": "Hormozi (Viral)",
+      "boxed": "Boxed (Clean)",
+      "none": "Keine Untertitel"
+    },
+    "options": {
+      "blurredBackground": "Verschwommener Hintergrund",
+      "blackBars": "Schwarze Balken"
+    },
+    "createBtn": "🎬 MEIN SHORT ERSTELLEN (10 Credits)",
+    "generating": "KI-Generierung...",
+    "success": "Herzlichen Glückwunsch!",
+    "viewDashboard": "In meinen Projekten ansehen",
+    "howToUse": "Anleitung",
+    "steps": {
+      "step1": "YouTube-Link einfügen",
+      "step2": "Viralen Moment einrahmen",
+      "step3": "Stil hinzufügen (Musik, Untertitel)",
+      "step4": "Lass die KI zaubern"
+    },
+    "aiPower": "KI-Power",
+    "features": [
+      "Intelligenter verschwommener Hintergrund",
+      "Immersive Hintergrundmusik"
+    ],
+    "generationMode": {
+      "link": "Mit Link generieren",
+      "manual": "Manuelle Erstellung (KI)",
+      "promptPlaceholder": "Beschreiben Sie Ihren Short (z.B. Ein schnelles Kochrezept...)",
+      "bulk": "10 Varianten auf einmal generieren",
+      "remix": "Video-Remix (Stil-Klonen)",
+      "styleVariants": "Stil-Varianten",
+      "addStyle": "Stil hinzufügen",
+      "stylePlaceholder": "z.B. Europäischer Stil",
+      "videoSource": "Quellvideo",
+      "uploadText": "Ziehen oder klicken, um Quellvideo hochzuladen"
+    }
+  }
+}
