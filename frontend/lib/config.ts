@@ -1,4 +1,4 @@
-const PRODUCTION_API_URL = 'https://myveed-backend.vercel.app/api';
+const PRODUCTION_API_URL = 'https://myveed-saas-34001d4a7471.herokuapp.com/api';
 
 export const getApiUrl = () => {
   const envUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
