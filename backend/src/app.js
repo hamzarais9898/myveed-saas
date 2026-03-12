@@ -22,7 +22,7 @@ const platformRoutes = require('./routes/platformRoutes');
 // Initialize Express app
 const app = express();
 
-// Middleware
+// Allowed frontend origins
 const allowedOrigins = [
   'http://localhost:3000',
   'https://myveed-frontend.vercel.app',
@@ -30,7 +30,35 @@ const allowedOrigins = [
   process.env.FRONTEND_URL
 ].filter(Boolean);
 
-const corsOptions = {
+// Early request log
+app.use((req, res, next) => {
+  const origin = req.headers.origin || 'N/A';
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path} - Origin: ${origin}`);
+  next();
+});
+
+// Manual CORS + explicit preflight handling
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+
+  if (origin && allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Vary', 'Origin');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  }
+
+  if (req.method === 'OPTIONS') {
+    console.log(`✅ Preflight handled for ${req.path} from ${origin || 'N/A'}`);
+    return res.sendStatus(204);
+  }
+
+  next();
+});
+
+// cors middleware as secondary protection
+app.use(cors({
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);
 
@@ -44,11 +72,7 @@ const corsOptions = {
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
-};
-
-app.use(cors(corsOptions));
-// Explicitly handle preflight requests
-app.options('*', cors(corsOptions));
+}));
 
 app.use(express.json({
   limit: '50mb',
@@ -56,39 +80,32 @@ app.use(express.json({
     req.rawBody = buf;
   }
 }));
+
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Request logging middleware
-app.use((req, res, next) => {
-  const origin = req.headers.origin || 'N/A';
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.path} - Origin: ${origin}`);
-  next();
-});
-
-// Health check endpoint (moved under /api as per requirement or kept original?)
-// Requirement says "Ensure these endpoints work: /api/health"
+// Health check endpoints
 app.get('/api/health', (req, res) => {
-  res.json({
+  return res.status(200).json({
     success: true,
+    route: '/api/health',
     message: 'Video SaaS API is running',
     timestamp: new Date().toISOString()
   });
 });
 
-// Original health check for backward compatibility
 app.get('/health', (req, res) => {
-  res.json({
+  return res.status(200).json({
     success: true,
+    route: '/health',
     message: 'Video SaaS API is running',
     timestamp: new Date().toISOString()
   });
 });
 
-// API Routes
+// Specific API routes first
 app.use('/api/auth', authRoutes);
 app.use('/api/videos', videoRoutes);
 app.use('/api/images', imageRoutes);
-app.use('/api', publishRoutes);
 app.use('/api/tiktok-accounts', tiktokAccountRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/tts', ttsRoutes);
@@ -100,11 +117,14 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/stars', starsRoutes);
 app.use('/api/influencers', influencerRoutes);
 app.use('/api/newsletter', newsletterRoutes);
+
+// Generic /api routes last
+app.use('/api', publishRoutes);
 app.use('/api', platformRoutes);
 
 // 404 handler
 app.use((req, res) => {
-  res.status(404).json({
+  return res.status(404).json({
     success: false,
     message: 'Route not found'
   });
@@ -113,7 +133,17 @@ app.use((req, res) => {
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Server error:', err);
-  res.status(err.status || 500).json({
+
+  const origin = req.headers.origin;
+  if (origin && allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Vary', 'Origin');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  }
+
+  return res.status(err.status || 500).json({
     success: false,
     message: err.message || 'Internal server error',
     ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
