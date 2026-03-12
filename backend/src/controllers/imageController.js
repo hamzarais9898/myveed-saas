@@ -2,7 +2,6 @@ const Image = require('../models/Image');
 const Subscription = require('../models/Subscription');
 const geminiProvider = require('../providers/gemini.provider');
 const bananaProvider = require('../providers/banana.provider');
-const { v4: uuidv4 } = require('uuid');
 
 /**
  * Generate new image(s)

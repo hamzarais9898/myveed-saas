@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
-const { v4: uuidv4 } = require('uuid');
+const { generateUuid } = require('../utils/generateUuid');
 
 /**
  * Temp Download Service
@@ -14,7 +14,8 @@ exports.downloadToTemp = async (url, extension = '.mp4') => {
       fs.mkdirSync(tempDir, { recursive: true });
     }
 
-    const fileName = `${uuidv4()}${extension}`;
+    const uuid = await generateUuid();
+    const fileName = `${uuid}${extension}`;
     const filePath = path.join(tempDir, fileName);
 
     const response = await axios({

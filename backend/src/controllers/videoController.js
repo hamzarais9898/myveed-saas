@@ -4,7 +4,7 @@ const Image = require('../models/Image');
 const mongoose = require('mongoose');
 const Influencer = require('../models/Influencer');
 const providerRouter = require('../providers');
-const { v4: uuidv4 } = require('uuid');
+const { generateUuid } = require('../utils/generateUuid');
 const fs = require('fs');
 const path = require('path');
 const uploadService = require('../services/uploadService');
@@ -367,7 +367,7 @@ exports.generateVideo = async (req, res) => {
     }
 
     // Generate batch ID for grouping
-    const batchId = uuidv4();
+    const batchId = await generateUuid();
 
     // configsToGenerate already declared above
     const generatedVideos = [];

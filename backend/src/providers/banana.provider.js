@@ -1,4 +1,4 @@
-const { v4: uuidv4 } = require('uuid');
+const { generateUuid } = require('../utils/generateUuid');
 
 /**
  * Banana Provider (Google Gemini/Imagen Wrapper)
@@ -118,7 +118,7 @@ async function generateWithGemini(modelName, prompt, apiKey, aspectRatio) {
             for (const part of data.candidates[0].content.parts) {
                 if (part.inlineData) {
                      return {
-                        id: uuidv4(),
+                        id: await generateUuid(),
                         imageUrl: `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`,
                         status: 'completed'
                      };
@@ -167,7 +167,7 @@ async function generateWithImagenPredict(modelName, prompt, apiKey, aspectRatio)
         
         if (data.predictions && data.predictions[0]?.bytesBase64Encoded) {
              return {
-                id: uuidv4(),
+                id: await generateUuid(),
                 imageUrl: `data:image/png;base64,${data.predictions[0].bytesBase64Encoded}`,
                 status: 'completed'
             };
@@ -181,14 +181,14 @@ async function generateWithImagenPredict(modelName, prompt, apiKey, aspectRatio)
     }
 }
 
-function simulateGeneration(prompt) {
+async function simulateGeneration(prompt) {
   const UNSPLASH_FALLBACK = [
     'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=1024&q=80',
     'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=1024&q=80',
     'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=1024&q=80'
   ];
   return {
-    id: uuidv4(),
+    id: await generateUuid(),
     imageUrl: UNSPLASH_FALLBACK[Math.floor(Math.random() * UNSPLASH_FALLBACK.length)],
     status: 'completed'
   };

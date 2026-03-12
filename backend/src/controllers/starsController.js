@@ -1,7 +1,6 @@
 const Subscription = require('../models/Subscription');
 const Video = require('../models/Video');
 const providerRouter = require('../providers');
-const { v4: uuidv4 } = require('uuid');
 
 /**
  * Transform user video into a "Star" video
