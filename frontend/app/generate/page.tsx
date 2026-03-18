@@ -20,6 +20,7 @@ import StyleSelector, { VideoStyle } from '@/components/generation/StyleSelector
 import { useSpeechToText } from '@/hooks/useSpeechToText';
 import { Mic, MicOff } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import { useToast } from '@/context/ToastContext';
 
 interface Provider {
     id: 'luma' | 'sora' | 'veo' | 'runway';
@@ -34,6 +35,7 @@ interface Provider {
 function GenerateContent() {
     const router = useRouter();
     const { t } = useLanguage();
+    const { showToast } = useToast();
     const [promptText, setPromptText] = useState('');
     const [format, setFormat] = useState<'youtube' | 'short' | 'both'>('youtube');
     const [variants, setVariants] = useState(1);
@@ -58,7 +60,7 @@ function GenerateContent() {
     // Influencer Bridge State
     const [selectedInfluencerId, setSelectedInfluencerId] = useState<string | null>(null);
     const [selectedInfluencerName, setSelectedInfluencerName] = useState<string | null>(null);
-    const [selectedSourceType, setSelectedSourceType] = useState<'image' | 'influencer' | null>(null);
+    const [selectedSourceType, setSelectedSourceType] = useState<'image' | 'influencer' | 'fused-image' | null>(null);
 
     // Image Settings
     const [imageCount, setImageCount] = useState(1);
@@ -167,15 +169,37 @@ function GenerateContent() {
         const modeParam = searchParams.get('mode');
         if (modeParam === 'image-to-video') {
             const storedImageUrl = sessionStorage.getItem('animateImageUrl');
+            const storedImageId = sessionStorage.getItem('animateImageId');
+            const storedPromptText = sessionStorage.getItem('animatePromptText');
+            const sourceType = sessionStorage.getItem('animateSourceType');
+
             if (storedImageUrl) {
-                sessionStorage.removeItem('animateImageUrl'); // consume it
                 setSelectedImageForVideo(storedImageUrl);
+                if (storedImageId) setSelectedImageId(storedImageId);
+                if (sourceType) setSelectedSourceType(sourceType as 'image' | 'influencer' | 'fused-image');
+                
                 setGenerationMode('video');
                 setSoraMode('image-to-video');
                 setProvider('sora');
                 if (duration > 12) setDuration(4);
-                setPromptText('');
+                
+                // UX Improvement: Pre-fill a generic prompt if the current one is empty
+                const defaultPrompt = 'Animate this image smoothly with realistic motion and cinematic lighting.';
+                setPromptText(prev => prev.trim() ? prev : defaultPrompt);
+                
+                // Visual feedback for successful import
+                if (sourceType === 'fused-image') {
+                    showToast('Image fusionnée importée avec succès', 'success');
+                } else {
+                    showToast('Image importée avec succès', 'success');
+                }
             }
+
+            // Complete cleanup of transfer keys
+            sessionStorage.removeItem('animateImageUrl');
+            sessionStorage.removeItem('animateImageId');
+            sessionStorage.removeItem('animatePromptText');
+            sessionStorage.removeItem('animateSourceType');
             return;
         }
         // Legacy fallback: ?image=<url> (kept for backward compatibility)
@@ -228,6 +252,15 @@ function GenerateContent() {
                     };
                 };
 
+                const normalizedSourceType: 'image' | 'influencer' | undefined =
+                selectedSourceType === 'influencer'
+                    ? 'influencer'
+                    : selectedSourceType === 'image' || selectedSourceType === 'fused-image'
+                        ? 'image'
+                        : selectedImageId || selectedImageForVideo
+                            ? 'image'
+                            : undefined;
+
                 const options = {
                     subtitleStyle,
                     subtitlePosition,
@@ -237,7 +270,7 @@ function GenerateContent() {
                     videoStyle,
                     image: (provider === 'sora' && soraMode === 'image-to-video') ? (selectedImageId || selectedImageForVideo || undefined) : (selectedImageForVideo || undefined),
                     influencerId: selectedSourceType === 'influencer' ? (selectedInfluencerId || undefined) : undefined,
-                    sourceType: selectedSourceType || (selectedImageId ? 'image' : (selectedImageForVideo ? 'image' : undefined)),
+                    sourceType: normalizedSourceType,
                     preserveIdentity: selectedSourceType === 'influencer',
                     preservePhotorealism: selectedSourceType === 'influencer',
                     preserveFace: selectedSourceType === 'influencer',

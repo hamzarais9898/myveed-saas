@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter, usePathname } from 'next/navigation';
-import { Menu, X, ChevronDown, LogOut, CreditCard, LayoutDashboard, Languages, User, TrendingUp, Video, Wand2, Mic, Users, Star, BarChart3, Music, Layers } from 'lucide-react';
+import { Menu, X, ChevronDown, LogOut, CreditCard, LayoutDashboard, Languages, User, TrendingUp, Video, Wand2, Mic, Users, Star, BarChart3, Music, Layers, Sparkles } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { logout, getCurrentUser } from '@/services/authService';
 import { getCurrentSubscription } from '@/services/subscriptionService';
@@ -94,6 +94,7 @@ export default function Navbar() {
         { href: '/shorts', label: t('common.nav.shorts'), icon: Video },
         { href: '/generate', label: t('common.nav.generate'), icon: Wand2 },
         { href: '/text-to-speech', label: t('common.nav.tts'), icon: Mic },
+        { href: '/image-fusion', label: t('common.nav.imageFusion') || 'Fusion d\'images', icon: Sparkles },
         // { href: '/create-influencer', label: t('features.influencers.title'), icon: Users, badge: true },
     ];
     const dashboardItems = [

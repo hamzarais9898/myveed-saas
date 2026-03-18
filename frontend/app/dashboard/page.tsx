@@ -357,6 +357,13 @@ function DashboardContent() {
                             {t('dashboard.actions.generate')}
                         </button>
                         <button
+                            onClick={() => router.push('/image-fusion')}
+                            className="px-6 py-3 bg-white text-gray-900 font-black rounded-xl border-2 border-gray-100 hover:border-[#e2a9f1] transition-all flex items-center gap-3 uppercase tracking-widest text-xs shadow-sm hover:shadow-md"
+                        >
+                            <Sparkles className="w-5 h-5 text-[#c77ddf]" />
+                            {t('common.nav.imageFusion') || 'Fusion d\'Images'}
+                        </button>
+                        <button
                             onClick={() => router.push('/tiktok-accounts')}
                             className="px-6 py-3 bg-white text-gray-900 font-black rounded-xl border-2 border-gray-100 hover:border-[#e2a9f1] transition-all flex items-center gap-3 uppercase tracking-widest text-xs shadow-sm hover:shadow-md"
                         >
