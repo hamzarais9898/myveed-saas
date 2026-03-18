@@ -11,6 +11,7 @@ import { YouTubeIcon, ShortsIcon, TikTokIcon, InstagramIcon, FacebookIcon } from
 import { useLanguage } from '@/context/LanguageContext';
 import { useToast } from '@/context/ToastContext';
 import { useScheduledTasks } from '@/context/ScheduledTasksContext';
+import { normalizeProgress } from '@/utils/progressUtil';
 
 interface VideoCardProps {
     video: any;
@@ -296,7 +297,7 @@ export default function VideoCard({ video, onDelete, onUpdate, tiktokAccounts, s
                     </span>
                     {['generating', 'transcribing', 'editing', 'finishing', 'publishing'].includes(video.status) && (
                         <span className="text-[10px] font-black text-gray-400 bg-white/50 backdrop-blur-sm px-1.5 py-0.5 rounded-md">
-                            {video.progress || 0}%
+                            {normalizeProgress(video.progress)}%
                         </span>
                     )}
                 </div>

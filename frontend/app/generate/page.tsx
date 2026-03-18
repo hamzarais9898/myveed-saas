@@ -12,6 +12,7 @@ import { generateImage } from '@/services/imageService';
 import PremiumLoading from '@/components/PremiumLoading';
 import { Download, Image as ImageIcon, Video as VideoIcon, Sparkles } from 'lucide-react';
 import ImagePicker from '@/components/generation/ImagePicker';
+import PromptHelper from '@/components/generation/PromptHelper';
 
 import SubtitleStudio, { SubtitleStyle, SubtitlePosition } from '@/components/generation/SubtitleStudio';
 import MusicSelector, { MusicTrack } from '@/components/generation/MusicSelector';
@@ -484,6 +485,8 @@ function GenerateContent() {
 
                             {/* 1. Prompt & Format Section */}
                             <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-shadow space-y-8">
+                                <PromptHelper promptText={promptText} onPromptChange={setPromptText} />
+                                
                                 <div className="space-y-4">
                                     <div className="flex justify-between items-center">
                                         <label className="block text-sm font-bold text-gray-700 uppercase tracking-wider">
@@ -614,6 +617,10 @@ function GenerateContent() {
                                                 ENREGISTREMENT...
                                             </div>
                                         )}
+                                        {/* Tooltip hint on hover */}
+                                        <div className="absolute top-4 right-4 text-gray-400 group-hover:text-indigo-400 opacity-0 hover:opacity-100 transition-opacity cursor-help" title="Avoid real names. Describe appearance instead.">
+                                           <Sparkles className="w-5 h-5" />
+                                        </div>
                                     </div>
                                 </div>
 

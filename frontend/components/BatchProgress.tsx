@@ -1,4 +1,5 @@
 'use client';
+import { normalizeProgress } from '@/utils/progressUtil';
 
 interface BatchProgressProps {
     current: number;
@@ -56,7 +57,7 @@ export default function BatchProgress({ current, total, videos }: BatchProgressP
                                     </span>
                                     {video.status !== 'generated' && video.status !== 'failed' && (
                                         <span className="bg-gray-800 px-1 rounded text-gray-400 font-mono">
-                                            {(video as any).progress || 0}%
+                                            {normalizeProgress((video as any).progress)}%
                                         </span>
                                     )}
                                 </div>
