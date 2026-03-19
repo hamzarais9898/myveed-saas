@@ -620,6 +620,51 @@
       "confirm": "Do you want to extend this video by an additional 5 seconds? (15 credits will be deducted)",
       "error": "Extension error",
       "success": "Extension in progress..."
+    },
+    "promptCoach": {
+      "title": "Prompt Coach",
+      "subtitle": "Write better prompts for high-performing videos",
+      "howTo": {
+        "title": "How to write a good prompt",
+        "desc": "Your image already contains the subject and background. Describe mostly what should move. Be clear and visual.",
+        "item1": "Character action",
+        "item2": "Camera movement",
+        "item3": "Product highlighting",
+        "item4": "Visual atmosphere",
+        "item5": "Marketing goal"
+      },
+      "formula": {
+        "character": "Character",
+        "action": "Action",
+        "camera": "Camera",
+        "mood": "Atmosphere",
+        "goal": "Goal"
+      },
+      "examples": {
+        "title": "Suggested Examples",
+        "product": "🎯 Product presentation",
+        "premium": "✨ Premium advertisement",
+        "tiktok": "📱 Dynamic TikTok",
+        "cinematic": "🎬 Cinematic lifestyle",
+        "demo": "🧼 Natural product demo"
+      },
+      "improve": "✨ Improve my prompt",
+      "assistant": {
+        "title": "Create my prompt step by step",
+        "q1": "What is the person doing?",
+        "q2": "How to show the product?",
+        "q3": "Camera type?",
+        "q4": "Atmosphere?",
+        "q5": "Goal?",
+        "generate": "Generate prompt"
+      },
+      "prompts": {
+        "product": "The character presents the product facing the camera with a natural gesture, then moves it slightly closer. Stable camera with slight zoom, clean and modern atmosphere, advertising rendering.",
+        "premium": "The character uses the product with slow and elegant movements, looks at the camera with confidence. Gentle cinematic camera, warm light, luxury atmosphere, high-end advertising rendering.",
+        "tiktok": "The character interacts quickly with the product with energy, natural and expressive gestures. Dynamic camera, fast pace, modern and engaging atmosphere, viral content.",
+        "cinematic": "The character moves through a natural setting, fluid and aesthetic movements. Slow moving camera, golden natural light, high-end lifestyle atmosphere.",
+        "demo": "Close-up of hands using the product, fluid gestures showing efficiency. Macro camera, clear light, authentic and reassuring atmosphere."
+      }
     }
   },
   "dashboard": {

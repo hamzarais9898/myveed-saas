@@ -676,6 +676,51 @@
       "confirm": "Voulez-vous étendre cette vidéo de 5 secondes supplémentaires ? (15 crédits seront déduits)",
       "error": "Erreur d’extension",
       "success": "Extension en cours..."
+    },
+    "promptCoach": {
+      "title": "Prompt Coach",
+      "subtitle": "Écrivez de meilleurs prompts pour des vidéos plus performantes",
+      "howTo": {
+        "title": "Comment écrire un bon prompt",
+        "desc": "Votre image contient déjà le sujet et le décor. Décrivez surtout ce qui doit bouger. Soyez clair et visuel.",
+        "item1": "Action du personnage",
+        "item2": "Mouvement de la caméra",
+        "item3": "Mise en avant du produit",
+        "item4": "Ambiance visuelle",
+        "item5": "Objectif marketing"
+      },
+      "formula": {
+        "character": "Personnage",
+        "action": "Action",
+        "camera": "Caméra",
+        "mood": "Ambiance",
+        "goal": "Objectif"
+      },
+      "examples": {
+        "title": "Exemples suggérés",
+        "product": "🎯 Présentation produit",
+        "premium": "✨ Publicité premium",
+        "tiktok": "📱 TikTok dynamique",
+        "cinematic": "🎬 Cinématique lifestyle",
+        "demo": "🧼 Démo produit naturelle"
+      },
+      "improve": "✨ Améliorer mon prompt",
+      "assistant": {
+        "title": "Créer mon prompt étape par étape",
+        "q1": "Que fait la personne ?",
+        "q2": "Comment montrer le produit ?",
+        "q3": "Type de caméra ?",
+        "q4": "Ambiance ?",
+        "q5": "Objectif ?",
+        "generate": "Générer le prompt"
+      },
+      "prompts": {
+        "product": "Le personnage présente le produit face caméra avec un geste naturel, puis le rapproche légèrement. Caméra stable avec léger zoom, ambiance propre et moderne, rendu publicitaire.",
+        "premium": "Le personnage utilise le produit avec des mouvements lents et élégants, regarde la caméra avec confiance. Caméra cinématique douce, lumière chaude, ambiance luxe, rendu publicité haut de gamme.",
+        "tiktok": "Le personnage interagit rapidement avec le produit avec énergie, gestes naturels et expressifs. Caméra dynamique, rythme rapide, ambiance moderne et engageante, contenu viral.",
+        "cinematic": "Le personnage évolue dans un décor naturel, mouvements fluides et esthétiques. Caméra en mouvement lent, lumière naturelle dorée, ambiance lifestyle haut de gamme.",
+        "demo": "Gros plan sur les mains utilisant le produit, gestes fluides montrant l'efficacité. Caméra macro, lumière claire, ambiance authentique et rassurante."
+      }
     }
   },
   "dashboard": {

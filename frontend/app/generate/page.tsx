@@ -13,6 +13,7 @@ import PremiumLoading from '@/components/PremiumLoading';
 import { Download, Image as ImageIcon, Video as VideoIcon, Sparkles } from 'lucide-react';
 import ImagePicker from '@/components/generation/ImagePicker';
 import PromptHelper from '@/components/generation/PromptHelper';
+import PromptCoach from '@/components/generation/PromptCoach';
 
 import SubtitleStudio, { SubtitleStyle, SubtitlePosition } from '@/components/generation/SubtitleStudio';
 import MusicSelector, { MusicTrack } from '@/components/generation/MusicSelector';
@@ -518,6 +519,7 @@ function GenerateContent() {
 
                             {/* 1. Prompt & Format Section */}
                             <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-shadow space-y-8">
+                                <PromptCoach promptText={promptText} onPromptChange={setPromptText} />
                                 <PromptHelper promptText={promptText} onPromptChange={setPromptText} />
                                 
                                 <div className="space-y-4">
