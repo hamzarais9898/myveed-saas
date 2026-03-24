@@ -308,9 +308,9 @@ export default function ImageFusionPanel() {
               </button>
               <button 
                 onClick={handleUseInVideo}
-                className="flex-1 max-w-[200px] h-12 bg-purple-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-purple-700 transition-all shadow-lg shadow-purple-600/20"
+                className="flex-1 max-w-[250px] h-12 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:from-purple-700 hover:to-indigo-700 transition-all shadow-lg shadow-purple-600/30 ring-2 ring-purple-600/50 ring-offset-2 animate-pulse"
               >
-                <Video className="w-5 h-5" /> Utiliser en Vidéo
+                <Video className="w-5 h-5" /> Animer cette image
               </button>
               <button onClick={handleReset} className="flex-1 max-w-[200px] h-12 bg-gray-900 text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-gray-800 transition-all">
                 <RefreshCw className="w-5 h-5" /> Nouvelle Fusion

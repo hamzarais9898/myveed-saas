@@ -10,7 +10,7 @@ import BatchProgress from '@/components/BatchProgress';
 import { generateVideo, getAvailableProviders, getVideoStatus } from '@/services/videoService';
 import { generateImage } from '@/services/imageService';
 import PremiumLoading from '@/components/PremiumLoading';
-import { Download, Image as ImageIcon, Video as VideoIcon, Sparkles, X } from 'lucide-react';
+import { Download, Image as ImageIcon, Video as VideoIcon, Sparkles, X, Layers } from 'lucide-react';
 import ImagePicker from '@/components/generation/ImagePicker';
 import PromptHelper from '@/components/generation/PromptHelper';
 import PromptCoach from '@/components/generation/PromptCoach';
@@ -57,6 +57,15 @@ function GenerateContent() {
     const [generationStatus, setGenerationStatus] = useState<string>('idle');
     const [generationProgress, setGenerationProgress] = useState<number>(0);
     const [pollingActive, setPollingActive] = useState(false);
+
+    // Helper & Multi-image State
+    const [showMarketingHelper, setShowMarketingHelper] = useState(true);
+    const [detectedMultipleFiles, setDetectedMultipleFiles] = useState<File[]>([]);
+
+    useEffect(() => {
+        const helperDismissed = localStorage.getItem('marketingHelperDismissed');
+        if (helperDismissed === 'true') setShowMarketingHelper(false);
+    }, []);
 
     // Influencer Bridge State
     const [selectedInfluencerId, setSelectedInfluencerId] = useState<string | null>(null);
@@ -220,26 +229,73 @@ function GenerateContent() {
             const storedPromptText = sessionStorage.getItem('animatePromptText');
             const sourceType = sessionStorage.getItem('animateSourceType');
 
+            // --- RESTORE CONTEXT ---
+            const savedPrompt = sessionStorage.getItem('generateContext_prompt');
+            const savedProvider = sessionStorage.getItem('generateContext_provider');
+            const savedSoraMode = sessionStorage.getItem('generateContext_soraMode');
+            const savedDuration = sessionStorage.getItem('generateContext_duration');
+            const savedFormat = sessionStorage.getItem('generateContext_format');
+            const savedVideoStyle = sessionStorage.getItem('generateContext_videoStyle');
+            const savedSubtitleStyle = sessionStorage.getItem('generateContext_subtitleStyle');
+            const savedSubtitlePosition = sessionStorage.getItem('generateContext_subtitlePosition');
+            const savedSubtitleSize = sessionStorage.getItem('generateContext_subtitleSize');
+            const savedShowSubtitles = sessionStorage.getItem('generateContext_showSubtitles');
+            const savedMusicUrl = sessionStorage.getItem('generateContext_musicUrl');
+            const savedMusicTrack = sessionStorage.getItem('generateContext_musicTrack');
+            const savedCameraConfig = sessionStorage.getItem('generateContext_cameraConfig');
+
             if (storedImageUrl) {
                 setSelectedImageForVideo(storedImageUrl);
                 if (storedImageId) setSelectedImageId(storedImageId);
                 if (sourceType) setSelectedSourceType(sourceType as 'image' | 'influencer' | 'fused-image');
                 
                 setGenerationMode('video');
-                setSoraMode('image-to-video');
-                setProvider('sora');
-                if (duration > 12) setDuration(4);
                 
+                // Use restored values or defaults
+                setSoraMode((savedSoraMode as 'text-to-video' | 'image-to-video') || 'image-to-video');
+                setProvider((savedProvider as 'luma' | 'sora' | 'veo') || 'sora');
+                
+                if (savedDuration) setDuration(parseInt(savedDuration, 10));
+                else if (duration > 12) setDuration(4);
+                
+                if (savedFormat) setFormat(savedFormat as 'youtube' | 'short' | 'both');
+                if (savedVideoStyle) setVideoStyle(savedVideoStyle as any);
+                if (savedSubtitleStyle) setSubtitleStyle(savedSubtitleStyle as any);
+                if (savedSubtitlePosition) setSubtitlePosition(savedSubtitlePosition as any);
+                if (savedSubtitleSize) setSubtitleSize(parseInt(savedSubtitleSize, 10));
+                if (savedShowSubtitles) setShowSubtitles(savedShowSubtitles === 'true');
+                if (savedMusicUrl) setMusicUrl(savedMusicUrl);
+                if (savedMusicTrack) setMusicTrack(savedMusicTrack);
+                if (savedCameraConfig) {
+                    try { setCameraConfig(JSON.parse(savedCameraConfig)); } catch (e) {}
+                }
+
                 const defaultPrompt = 'Animate this image smoothly with realistic motion and cinematic lighting.';
-                setPromptText(prev => prev.trim() ? prev : (storedPromptText || defaultPrompt));
+                setPromptText(prev => prev.trim() ? prev : (savedPrompt || storedPromptText || defaultPrompt));
                 
-                showToast(sourceType === 'fused-image' ? 'Image fusionnée importée' : 'Image importée', 'success');
+                showToast(sourceType === 'fused-image' ? 'Image fusionnée importée et contexte restauré' : 'Image importée', 'success');
             }
 
+            // --- CLEANUP ---
             sessionStorage.removeItem('animateImageUrl');
             sessionStorage.removeItem('animateImageId');
             sessionStorage.removeItem('animatePromptText');
             sessionStorage.removeItem('animateSourceType');
+            
+            sessionStorage.removeItem('generateContext_prompt');
+            sessionStorage.removeItem('generateContext_provider');
+            sessionStorage.removeItem('generateContext_soraMode');
+            sessionStorage.removeItem('generateContext_duration');
+            sessionStorage.removeItem('generateContext_format');
+            sessionStorage.removeItem('generateContext_videoStyle');
+            sessionStorage.removeItem('generateContext_subtitleStyle');
+            sessionStorage.removeItem('generateContext_subtitlePosition');
+            sessionStorage.removeItem('generateContext_subtitleSize');
+            sessionStorage.removeItem('generateContext_showSubtitles');
+            sessionStorage.removeItem('generateContext_musicUrl');
+            sessionStorage.removeItem('generateContext_musicTrack');
+            sessionStorage.removeItem('generateContext_cameraConfig');
+
             return;
         }
 
@@ -267,6 +323,22 @@ function GenerateContent() {
             // Set a dummy preview URL or leave null to show a placeholder
             // In a real app, this would be a low-res generation or a frame
         }, 1500);
+    };
+
+    const saveGenerateContext = () => {
+        sessionStorage.setItem('generateContext_prompt', promptText);
+        sessionStorage.setItem('generateContext_provider', provider);
+        sessionStorage.setItem('generateContext_soraMode', soraMode);
+        sessionStorage.setItem('generateContext_duration', duration.toString());
+        sessionStorage.setItem('generateContext_format', format);
+        sessionStorage.setItem('generateContext_videoStyle', videoStyle);
+        sessionStorage.setItem('generateContext_subtitleStyle', subtitleStyle);
+        sessionStorage.setItem('generateContext_subtitlePosition', subtitlePosition);
+        sessionStorage.setItem('generateContext_subtitleSize', subtitleSize.toString());
+        sessionStorage.setItem('generateContext_showSubtitles', showSubtitles.toString());
+        if (musicUrl) sessionStorage.setItem('generateContext_musicUrl', musicUrl);
+        if (musicTrack) sessionStorage.setItem('generateContext_musicTrack', musicTrack);
+        sessionStorage.setItem('generateContext_cameraConfig', JSON.stringify(cameraConfig));
     };
 
     const handleFinalGenerate = async () => {
@@ -604,6 +676,68 @@ function GenerateContent() {
                                     {/* Sora Image Picker */}
                                     {generationMode === 'video' && provider === 'sora' && soraMode === 'image-to-video' && (
                                         <div className="space-y-4 mb-6">
+                                            {/* Premium Marketing Helper Card */}
+                                            {showMarketingHelper && detectedMultipleFiles.length <= 1 && !selectedImageForVideo && (
+                                                <div className="bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-100 rounded-3xl p-6 shadow-sm mb-4">
+                                                    <div className="flex gap-4">
+                                                        <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center flex-shrink-0">
+                                                            <Sparkles className="w-6 h-6 text-purple-600" />
+                                                        </div>
+                                                        <div>
+                                                            <h3 className="text-sm font-black text-gray-900 mb-1">Créer une vidéo produit à partir de plusieurs images ?</h3>
+                                                            <p className="text-sm text-gray-600 mb-4">Combinez d’abord vos visuels en une image marketing cohérente, puis animez-la pour obtenir un meilleur résultat.</p>
+                                                            <div className="flex flex-wrap gap-3">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        saveGenerateContext();
+                                                                        router.push('/image-fusion?source=generate_promo');
+                                                                    }}
+                                                                    className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold rounded-xl transition-colors shadow-md shadow-purple-600/20"
+                                                                >
+                                                                    Fusionner mes images
+                                                                </button>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        setShowMarketingHelper(false);
+                                                                        localStorage.setItem('marketingHelperDismissed', 'true');
+                                                                    }}
+                                                                    className="px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-sm font-bold rounded-xl transition-colors border border-gray-200"
+                                                                >
+                                                                    Continuer avec une seule image
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Contextual Warning for Multiple Files */}
+                                            {detectedMultipleFiles.length > 1 && (
+                                                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-4 flex items-center justify-between animate-in slide-in-from-top duration-300">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 flex-shrink-0">
+                                                            <Layers className="w-5 h-5" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-sm font-bold text-gray-900">Plusieurs images détectées.</p>
+                                                            <p className="text-xs text-gray-600">Pour une vidéo produit plus cohérente, fusionnez-les d’abord.</p>
+                                                        </div>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            saveGenerateContext();
+                                                            router.push('/image-fusion?source=generate_promo');
+                                                        }}
+                                                        className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold rounded-xl transition-colors whitespace-nowrap"
+                                                    >
+                                                        Fusionner maintenant
+                                                    </button>
+                                                </div>
+                                            )}
+
                                             <div className="flex items-center justify-between">
                                                 <label className="block text-sm font-bold text-gray-700 uppercase tracking-wider">
                                                     Image Initiale
@@ -656,12 +790,24 @@ function GenerateContent() {
                                                     </div>
                                                 </div>
                                             ) : (
-                                                <div className="bg-gray-50 border-2 border-dashed border-gray-200 rounded-3xl p-6">
+                                                <div 
+                                                    className={`bg-gray-50 border-2 border-dashed ${detectedMultipleFiles.length > 1 ? 'border-amber-300 bg-amber-50/30' : 'border-gray-200'} rounded-3xl p-6 transition-colors`}
+                                                    onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                                                    onDrop={(e) => {
+                                                        e.preventDefault(); e.stopPropagation();
+                                                        if (e.dataTransfer.files && e.dataTransfer.files.length > 1) {
+                                                            setDetectedMultipleFiles(Array.from(e.dataTransfer.files));
+                                                        } else if (e.dataTransfer.files && e.dataTransfer.files.length === 1) {
+                                                            setDetectedMultipleFiles([]);
+                                                        }
+                                                    }}
+                                                >
                                                     <ImagePicker
                                                         selectedImageId={selectedImageId}
                                                         onSelect={(img) => {
                                                             setSelectedImageId(img.id);
                                                             setSelectedImageForVideo(img.url);
+                                                            setDetectedMultipleFiles([]);
                                                         }}
                                                     />
                                                 </div>
