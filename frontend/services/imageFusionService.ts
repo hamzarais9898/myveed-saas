@@ -59,3 +59,11 @@ export const getFusionHistory = async (page: number = 1, limit: number = 20) => 
     });
     return response.data;
 };
+
+export const getFusionById = async (fusionId: string) => {
+    const token = localStorage.getItem('token');
+    const response = await axios.get(`${API_URL}/image-fusion/${fusionId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+};

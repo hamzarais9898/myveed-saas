@@ -9,7 +9,7 @@ import {
     User, Dna, Save, Wand2, RefreshCw, Sparkles, ScanFace,
     Search, X, Loader2, CheckCircle, ArrowRight, Plus,
     Video, Trash2, Users, Camera, Smile, Eye, Scissors,
-    Check, Play, Send, LayoutGrid, Layout, Image as ImageIcon, Target
+    Check, Play, LayoutGrid, Layout, Image as ImageIcon, Target
 } from 'lucide-react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -28,9 +28,8 @@ export default function AIInfluencerPage() {
     // Data State
     const [influencers, setInfluencers] = useState<influencerService.Influencer[]>([]);
     const [selectedInfluencer, setSelectedInfluencer] = useState<influencerService.Influencer | null>(null);
-    const [showPhotoPromptModal, setShowPhotoPromptModal] = useState(false);
-    const [photoPrompt, setPhotoPrompt] = useState('');
-    const [isGeneratingPhoto, setIsGeneratingPhoto] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [showCreateForm, setShowCreateForm] = useState(false);
 
     const getAllAssets = (inf: influencerService.Influencer) => {
         const photos = (inf.photos || []).map(p => ({ ...p, type: 'photo' }));
@@ -38,8 +37,6 @@ export default function AIInfluencerPage() {
         // @ts-ignore
         return [...photos, ...videos].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     };
-    const [loading, setLoading] = useState(true);
-    const [showCreateForm, setShowCreateForm] = useState(false);
 
     // Enhanced State for Native High-Fidelity Creator
     const [gender, setGender] = useState<'man' | 'woman'>('woman');
@@ -168,31 +165,21 @@ export default function AIInfluencerPage() {
         router.push('/generate?mode=image-to-video&source=influencer');
     };
 
-    const handleGenerateSinglePhoto = async () => {
-        if (!selectedInfluencer || !photoPrompt.trim()) return;
-        setIsGeneratingPhoto(true);
-        try {
-            await influencerService.generatePhotos(selectedInfluencer._id, 1, photoPrompt);
-            showToast('Photo générée avec succès !', 'success');
-            setShowPhotoPromptModal(false);
-            setPhotoPrompt('');
-            await loadInfluencers();
-        } catch (error: any) {
-            const apiError = error.response?.data;
-            if (apiError?.requiresSubscription) {
-                showToast(t('errors.subscriptionRequired'), 'error');
-            } else if (apiError?.creditsNeeded !== undefined) {
-                let msg = t('errors.insufficientCredits');
-                msg = msg.replace('{needed}', apiError.creditsNeeded);
-                msg = msg.replace('{available}', apiError.creditsAvailable);
-                showToast(msg, 'error');
-            } else {
-                showToast(apiError?.message || t('errors.failedToGenerate'), 'error');
-            }
-        } finally {
-            setIsGeneratingPhoto(false);
-        }
+    // Bridge to Image Generation
+    const handleGenerateInfluencerPhoto = (inf: influencerService.Influencer, imageUrl?: string) => {
+        if (!inf) return;
+        
+        const finalImageUrl = imageUrl || (inf.photos && inf.photos.length > 0 ? inf.photos[0].imageUrl : inf.avatarUrl);
+        
+        sessionStorage.setItem('generateSourceType', 'influencer');
+        sessionStorage.setItem('generateInfluencerId', inf._id);
+        sessionStorage.setItem('generateInfluencerName', inf.name);
+        sessionStorage.setItem('generateInfluencerImageUrl', finalImageUrl);
+        
+        router.push('/generate?mode=image&source=influencer');
     };
+
+
 
     // Generate Avatar from LOCAL PRESETS (Expanded Matrix: 12 Variants)
     const updatePreview = useCallback(() => {
@@ -539,7 +526,7 @@ export default function AIInfluencerPage() {
                                                         {t('influencers.generateVideo')}
                                                     </button>
                                                     <button
-                                                        onClick={() => setShowPhotoPromptModal(true)}
+                                                        onClick={() => handleGenerateInfluencerPhoto(selectedInfluencer)}
                                                         className="px-8 py-4 bg-black text-white font-black rounded-2xl text-[9px] uppercase tracking-widest transition-all hover:scale-105 shadow-xl"
                                                     >
                                                         Générer une Photo
@@ -567,14 +554,23 @@ export default function AIInfluencerPage() {
                                                             <div className="absolute top-2 right-2 px-2 py-1 bg-black/50 rounded-lg text-[8px] font-bold text-white uppercase tracking-wider backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity">
                                                                 Photo
                                                             </div>
-                                                            <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/40 transition-all opacity-0 group-hover:opacity-100">
-                                                                <button
-                                                                    onClick={() => handleAnimateInfluencer(selectedInfluencer, asset.imageUrl)}
-                                                                    className="px-4 py-2 bg-white text-black text-[8px] font-black uppercase tracking-widest rounded-xl shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 flex items-center gap-2 hover:bg-blue-600 hover:text-white"
-                                                                >
-                                                                    <Video className="w-3 h-3" />
-                                                                    {t('influencers.generateVideo')}
-                                                                </button>
+                                                            <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/40 transition-all opacity-0 group-hover:opacity-100 p-4">
+                                                                <div className="flex flex-col gap-2 w-full max-w-[140px]">
+                                                                    <button
+                                                                        onClick={() => handleAnimateInfluencer(selectedInfluencer, asset.imageUrl)}
+                                                                        className="w-full px-4 py-2.5 bg-white text-black text-[8px] font-black uppercase tracking-widest rounded-xl shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 flex items-center justify-center gap-2 hover:bg-blue-600 hover:text-white"
+                                                                    >
+                                                                        <Video className="w-3 h-3" />
+                                                                        {t('influencers.generateVideo')}
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => handleGenerateInfluencerPhoto(selectedInfluencer, asset.imageUrl)}
+                                                                        className="w-full px-4 py-2.5 bg-black text-white text-[8px] font-black uppercase tracking-widest rounded-xl shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 flex items-center justify-center gap-2 hover:bg-indigo-600"
+                                                                    >
+                                                                        <ImageIcon className="w-3 h-3" />
+                                                                        Générer Photo
+                                                                    </button>
+                                                                </div>
                                                             </div>
                                                         </>
                                                     )}
@@ -661,15 +657,6 @@ export default function AIInfluencerPage() {
                         </div>
                     </div>
                 </main>
-
-                <PromptModal
-                    isOpen={showPhotoPromptModal}
-                    onClose={() => setShowPhotoPromptModal(false)}
-                    onSubmit={handleGenerateSinglePhoto}
-                    isLoading={isGeneratingPhoto}
-                    prompt={photoPrompt}
-                    setPrompt={setPhotoPrompt}
-                />
 
                 <AdvancedStudioModal
                     isOpen={showAdvancedStudio}
@@ -867,41 +854,6 @@ const AdvancedStudioModal = ({ isOpen, onClose, t, gender, setGender, skinTone, 
                     </div>
                 </div>
             </motion.div>
-        </div>
-    );
-};
-
-const PromptModal = ({ isOpen, onClose, onSubmit, isLoading, prompt, setPrompt }: any) => {
-    if (!isOpen) return null;
-    return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <div className="bg-white rounded-[2.5rem] p-10 max-w-lg w-full shadow-2xl animate-in fade-in zoom-in-95 duration-200 relative overflow-hidden">
-                <button onClick={onClose} className="absolute top-6 right-6 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all group border border-gray-100">
-                    <X className="w-4 h-4 text-gray-400 group-hover:text-gray-900" />
-                </button>
-                <h3 className="text-2xl font-black mb-6 tracking-tighter">Générer une nouvelle photo</h3>
-                <textarea
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    placeholder="Décrivez la photo que vous souhaitez (ex: En train de boire un café à Paris...)"
-                    className="w-full h-32 p-4 bg-gray-50 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none resize-none font-medium mb-6 text-black"
-                />
-                <div className="flex gap-4">
-                    <button
-                        onClick={onClose}
-                        className="flex-1 py-4 bg-gray-100 text-gray-600 font-bold rounded-xl hover:bg-gray-200 transition-colors"
-                    >
-                        Annuler
-                    </button>
-                    <button
-                        onClick={onSubmit}
-                        disabled={isLoading || !prompt.trim()}
-                        className="flex-1 py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                    >
-                        {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Générer'}
-                    </button>
-                </div>
-            </div>
         </div>
     );
 };

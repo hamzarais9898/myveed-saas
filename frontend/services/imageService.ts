@@ -10,12 +10,25 @@ export const generateImage = async (
     style: 'realistic' | 'cinematic' | 'illustration' | 'anime' | 'painting' | 'photorealistic' = 'cinematic',
     variants: number = 1,
     provider: string = 'gemini',
-    quality: 'standard' | 'hd' = 'standard'
+    quality: 'standard' | 'hd' = 'standard',
+    influencerId?: string,
+    referenceImage?: string,
+    preserveIdentity: boolean = false
 ) => {
     const token = localStorage.getItem('token');
     const response = await axios.post(
         `${API_URL}/images/generate`,
-        { promptText, resolution, style, variants, provider, quality },
+        { 
+            promptText, 
+            resolution, 
+            style, 
+            variants, 
+            provider, 
+            quality,
+            influencerId,
+            referenceImage,
+            preserveIdentity
+        },
         {
             headers: { Authorization: `Bearer ${token}` }
         }

@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, Image as ImageIcon, Upload, X, GripVertical, CheckCircle2, Download, Video, RefreshCw, Layers } from 'lucide-react';
-import { generateFusedImage, ImageFusionOrderMapItem } from '@/services/imageFusionService';
+import { generateFusedImage, getFusionById, ImageFusionOrderMapItem } from '@/services/imageFusionService';
 import { getImages } from '@/services/imageService';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -135,12 +135,66 @@ export default function ImageFusionPanel() {
     setDraggedItemIndex(null);
   };
 
+  // --- Polling Logic ---
+  const [currentFusionId, setCurrentFusionId] = useState<string | null>(null);
+
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+
+    if (status === 'processing' && currentFusionId) {
+      console.log(`[POLLING] Started for fusion: ${currentFusionId}`);
+      
+      intervalId = setInterval(async () => {
+        try {
+          const result = await getFusionById(currentFusionId);
+          console.log(`[POLLING] Status check: ${result.fusion?.status}`);
+
+          if (result.success && result.fusion) {
+            const { status: fusionStatus, generatedImageUrl, errorMessage: fusionError } = result.fusion;
+
+            if (fusionStatus === 'generated') {
+              console.log('[POLLING] Success! Image generated.');
+              setFusedResult({
+                ...result.fusion,
+                imageUrl: generatedImageUrl,
+                id: result.fusion._id
+              });
+              setStatus('success');
+              setCurrentFusionId(null);
+              clearInterval(intervalId);
+              loadGallery(); // Refresh gallery in case it's opened
+            } else if (fusionStatus === 'failed') {
+              console.error('[POLLING] Fusion failed:', fusionError);
+              setErrorMessage(fusionError || 'La fusion a échoué en arrière-plan.');
+              setStatus('error');
+              setCurrentFusionId(null);
+              clearInterval(intervalId);
+            }
+          }
+        } catch (err: any) {
+          console.error('[POLLING ERROR]', err);
+          // We don't stop polling on a single network error, but maybe after X retries?
+          // For now, let's just log it.
+        }
+      }, 3000); // Poll every 3 seconds
+    }
+
+    return () => {
+      if (intervalId) {
+        console.log('[POLLING] Cleanup on unmount or status change');
+        clearInterval(intervalId);
+      }
+    };
+  }, [status, currentFusionId]);
+
   // --- Generate Logic ---
   const handleGenerate = async () => {
     if (selectedImages.length === 0) {
       setErrorMessage('Tu dois sélectionner au moins une image.');
       return;
     }
+
+    if (status === 'processing') return; // Prevent double submission
 
     setStatus('processing');
     setErrorMessage('');
@@ -152,11 +206,12 @@ export default function ImageFusionPanel() {
       const localFileIds = localImageObjects.map(img => img.id);
       
       const orderMap: ImageFusionOrderMapItem[] = selectedImages.map((img, idx) => ({
-        id: img.id, // now strictly using the unique ID for both local and gallery
+        id: img.id,
         source: img.source,
         index: idx
       }));
 
+      console.log('[IMAGE FUSION] Sending generation request...');
       const result = await generateFusedImage({
         prompt,
         resolution,
@@ -168,16 +223,18 @@ export default function ImageFusionPanel() {
         uploadedLocalFiles
       });
 
-      if (result.success && result.fusedImage) {
-        setFusedResult(result.fusedImage);
-        setStatus('success');
+      if (result.success && result.fusionId) {
+        console.log('[IMAGE FUSION] Request accepted, fusionId:', result.fusionId);
+        setCurrentFusionId(result.fusionId);
+        // Status is already 'processing', polling useEffect will take over
       } else {
-        throw new Error(result.message || 'Error generating image');
+        throw new Error(result.message || 'Error starting fusion');
       }
 
     } catch (err: any) {
-      console.error(err);
-      setErrorMessage(err.response?.data?.message || err.message || 'Une erreur est survenue lors de la fusion.');
+      console.error('[IMAGE FUSION ERROR]', err);
+      const msg = err.response?.data?.message || err.message || 'Une erreur est survenue lors du lancement de la fusion.';
+      setErrorMessage(msg);
       setStatus('error');
     }
   };
@@ -186,6 +243,7 @@ export default function ImageFusionPanel() {
     setStatus('idle');
     setFusedResult(null);
     setErrorMessage('');
+    setCurrentFusionId(null);
   };
 
   const handleDownload = () => {
@@ -426,6 +484,12 @@ export default function ImageFusionPanel() {
                     </>
                   )}
                 </button>
+
+                {status === 'processing' && (
+                  <p className="text-xs text-purple-600 font-medium text-center mt-3 animate-pulse">
+                    La fusion peut prendre quelques instants. Votre image sera ajoutée à votre album dès qu'elle sera prête.
+                  </p>
+                )}
               </div>
             </div>
           </div>

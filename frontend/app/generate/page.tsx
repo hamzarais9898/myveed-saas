@@ -10,7 +10,7 @@ import BatchProgress from '@/components/BatchProgress';
 import { generateVideo, getAvailableProviders, getVideoStatus } from '@/services/videoService';
 import { generateImage } from '@/services/imageService';
 import PremiumLoading from '@/components/PremiumLoading';
-import { Download, Image as ImageIcon, Video as VideoIcon, Sparkles } from 'lucide-react';
+import { Download, Image as ImageIcon, Video as VideoIcon, Sparkles, X } from 'lucide-react';
 import ImagePicker from '@/components/generation/ImagePicker';
 import PromptHelper from '@/components/generation/PromptHelper';
 import PromptCoach from '@/components/generation/PromptCoach';
@@ -99,6 +99,15 @@ function GenerateContent() {
     const [promptBeforeSpeech, setPromptBeforeSpeech] = useState('');
     const { isListening, transcript, toggleListening, error: sttError } = useSpeechToText({ lang: 'fr-FR' });
 
+    // Factorized clearing logic
+    const clearInfluencerReference = () => {
+        setSelectedImageForVideo(null);
+        setSelectedImageId(null);
+        setSelectedInfluencerId(null);
+        setSelectedInfluencerName(null);
+        setSelectedSourceType(null);
+    };
+
     useEffect(() => {
         if (isListening) {
             setPromptText(promptBeforeSpeech + (promptBeforeSpeech && transcript ? ' ' : '') + transcript);
@@ -141,7 +150,7 @@ function GenerateContent() {
     // Handle image param from URL (?image=...) — fired when coming from PhotoCard "Animer" button
     const searchParams = useSearchParams();
     useEffect(() => {
-        // Influencer Bridge Priority
+        // 1. Influencer Bridge Priority - VIDEO
         const animateSourceType = sessionStorage.getItem('animateSourceType');
         const animateInfluencerId = sessionStorage.getItem('animateInfluencerId');
         const animateInfluencerName = sessionStorage.getItem('animateInfluencerName');
@@ -166,8 +175,45 @@ function GenerateContent() {
             return;
         }
 
-        // New approach: read from sessionStorage (avoids URL length issues with long Cloudinary URLs)
+        // 2. Influencer Bridge Priority - IMAGE
         const modeParam = searchParams.get('mode');
+        const sourceParam = searchParams.get('source');
+
+        const generateSourceType = sessionStorage.getItem('generateSourceType');
+        const generateInfluencerId = sessionStorage.getItem('generateInfluencerId');
+        const generateInfluencerName = sessionStorage.getItem('generateInfluencerName');
+        const generateInfluencerImageUrl = sessionStorage.getItem('generateInfluencerImageUrl');
+
+        if (modeParam === 'image' && sourceParam === 'influencer' && generateSourceType === 'influencer' && generateInfluencerId) {
+            if (!generateInfluencerImageUrl) {
+                showToast("Impossible de charger l'image de référence de l'influenceur.", 'error');
+                // Cleanup even on failure
+                sessionStorage.removeItem('generateSourceType');
+                sessionStorage.removeItem('generateInfluencerId');
+                sessionStorage.removeItem('generateInfluencerName');
+                sessionStorage.removeItem('generateInfluencerImageUrl');
+                return;
+            }
+
+            setSelectedInfluencerId(generateInfluencerId);
+            setSelectedInfluencerName(generateInfluencerName);
+            setSelectedSourceType('influencer');
+            setSelectedImageForVideo(generateInfluencerImageUrl);
+            setGenerationMode('image');
+            
+            const defaultPrompt = 'Create a new photorealistic image of this influencer in a new scene while preserving identity, face structure, realism, and natural skin details.';
+            setPromptText(prev => prev.trim() ? prev : defaultPrompt);
+            showToast(`${generateInfluencerName} importé avec succès`, 'success');
+
+            // Clean up
+            sessionStorage.removeItem('generateSourceType');
+            sessionStorage.removeItem('generateInfluencerId');
+            sessionStorage.removeItem('generateInfluencerName');
+            sessionStorage.removeItem('generateInfluencerImageUrl');
+            return;
+        }
+
+        // 3. Standard image-to-video transfer (sessionStorage)
         if (modeParam === 'image-to-video') {
             const storedImageUrl = sessionStorage.getItem('animateImageUrl');
             const storedImageId = sessionStorage.getItem('animateImageId');
@@ -184,26 +230,20 @@ function GenerateContent() {
                 setProvider('sora');
                 if (duration > 12) setDuration(4);
                 
-                // UX Improvement: Pre-fill a generic prompt if the current one is empty
                 const defaultPrompt = 'Animate this image smoothly with realistic motion and cinematic lighting.';
-                setPromptText(prev => prev.trim() ? prev : defaultPrompt);
+                setPromptText(prev => prev.trim() ? prev : (storedPromptText || defaultPrompt));
                 
-                // Visual feedback for successful import
-                if (sourceType === 'fused-image') {
-                    showToast('Image fusionnée importée avec succès', 'success');
-                } else {
-                    showToast('Image importée avec succès', 'success');
-                }
+                showToast(sourceType === 'fused-image' ? 'Image fusionnée importée' : 'Image importée', 'success');
             }
 
-            // Complete cleanup of transfer keys
             sessionStorage.removeItem('animateImageUrl');
             sessionStorage.removeItem('animateImageId');
             sessionStorage.removeItem('animatePromptText');
             sessionStorage.removeItem('animateSourceType');
             return;
         }
-        // Legacy fallback: ?image=<url> (kept for backward compatibility)
+
+        // 4. Legacy URL param fallback
         const imageParam = searchParams.get('image');
         if (imageParam) {
             setSelectedImageForVideo(imageParam);
@@ -213,7 +253,7 @@ function GenerateContent() {
             if (duration > 12) setDuration(4);
             setPromptText('');
         }
-    }, [searchParams]);
+    }, [searchParams, duration, showToast]); // Proper dependencies
 
     const handlePreview = async () => {
         if (!promptText.trim() || loading) return;
@@ -277,7 +317,7 @@ function GenerateContent() {
                     preserveFace: selectedSourceType === 'influencer',
                     noStyleTransformation: selectedSourceType === 'influencer',
                     imageTail: selectedTailImage || undefined,
-                    cameraControl: (cameraConfig.type === 'simple' && Object.values(cameraConfig).some(v => v !== 0 && typeof v !== 'number'))
+                    cameraControl: (cameraConfig.type === 'simple' && Object.entries(cameraConfig).some(([k, v]) => k !== 'type' && v !== 0))
                         ? {
                             type: 'simple',
                             config: Object.fromEntries(
@@ -304,13 +344,17 @@ function GenerateContent() {
 
             } else {
                 // Image Generation
+                const isInfluencerSource = selectedSourceType === 'influencer';
                 const response = await generateImage(
                     promptText,
                     imageResolution,
                     'cinematic',
                     imageCount,
                     'banana',
-                    imageQuality
+                    imageQuality,
+                    isInfluencerSource ? (selectedInfluencerId || undefined) : undefined,
+                    isInfluencerSource ? (selectedImageForVideo || undefined) : undefined,
+                    isInfluencerSource
                 );
 
                 if (response.images) {
@@ -604,13 +648,7 @@ function GenerateContent() {
                                                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                                         <button
                                                             type="button"
-                                                            onClick={() => { 
-                                                                setSelectedImageForVideo(null); 
-                                                                setSelectedImageId(null);
-                                                                setSelectedInfluencerId(null);
-                                                                setSelectedInfluencerName(null);
-                                                                setSelectedSourceType(null);
-                                                            }}
+                                                            onClick={clearInfluencerReference}
                                                             className="bg-white text-gray-900 font-bold px-4 py-2 rounded-xl text-sm"
                                                         >
                                                             Changer d'image
@@ -628,6 +666,39 @@ function GenerateContent() {
                                                     />
                                                 </div>
                                             )}
+                                        </div>
+                                    )}
+
+                                    {/* Influencer Reference Card for IMAGE Mode */}
+                                    {generationMode === 'image' && selectedSourceType === 'influencer' && selectedImageForVideo && (
+                                        <div className="bg-white p-6 rounded-[2.5rem] border-2 border-indigo-100 shadow-sm mb-6 animate-in slide-in-from-top duration-500">
+                                            <div className="flex items-center justify-between mb-4">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="relative w-24 h-24 rounded-2xl overflow-hidden border-2 border-indigo-50 shadow-md">
+                                                        <img src={selectedImageForVideo} alt="Reference" className="w-full h-full object-cover" />
+                                                        <div className="absolute inset-0 bg-indigo-500/10" />
+                                                    </div>
+                                                    <div>
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <div className="px-2 py-0.5 bg-indigo-600 rounded-md">
+                                                                <span className="text-[9px] font-black text-white uppercase tracking-wider">Influencer Reference</span>
+                                                            </div>
+                                                            <span className="text-sm font-black text-gray-900">{selectedInfluencerName || 'Influenceur'}</span>
+                                                        </div>
+                                                        <p className="text-xs text-gray-500 font-medium max-w-xs">
+                                                            Le prompt décrira une nouvelle scène, mais l’identité visuelle sera conservée comme référence.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={clearInfluencerReference}
+                                                    className="p-3 bg-red-50 text-red-500 rounded-2xl hover:bg-red-100 transition-all group"
+                                                    title="Réinitialiser"
+                                                >
+                                                    <X className="w-5 h-5 group-hover:rotate-90 transition-transform" />
+                                                </button>
+                                            </div>
                                         </div>
                                     )}
 
