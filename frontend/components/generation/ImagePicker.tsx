@@ -6,7 +6,7 @@ import { Loader2, Image as ImageIcon, Plus, Check, Search, Wand2 } from 'lucide-
 import { useLanguage } from '@/context/LanguageContext';
 
 interface ImagePickerProps {
-    onSelect: (image: { id: string; url: string }) => void;
+    onSelect: (image: { id: string; url: string; sourceType?: string; influencerId?: string; influencerName?: string }) => void;
     selectedImageId?: string | null;
 }
 
@@ -53,7 +53,11 @@ export default function ImagePicker({ onSelect, selectedImageId }: ImagePickerPr
 
             const newImage = response.images?.[0] || response.image;
             if (newImage) {
-                const imgObj = { id: newImage._id || newImage.id, url: newImage.imageUrl || newImage.url };
+                const imgObj = { 
+                    id: newImage._id || newImage.id, 
+                    url: newImage.imageUrl || newImage.url,
+                    sourceType: 'standard'
+                };
                 onSelect(imgObj);
                 setActiveTab('gallery');
                 setGenPrompt('');
@@ -99,7 +103,13 @@ export default function ImagePicker({ onSelect, selectedImageId }: ImagePickerPr
                                 <button
                                     key={img._id}
                                     type="button"
-                                    onClick={() => onSelect({ id: img._id, url: img.imageUrl })}
+                                    onClick={() => onSelect({ 
+                                        id: img._id, 
+                                        url: img.imageUrl, 
+                                        sourceType: img.sourceType, 
+                                        influencerId: img.influencerId,
+                                        influencerName: img.influencer?.name
+                                    })}
                                     className={`group relative aspect-square rounded-xl overflow-hidden border-2 transition-all ${selectedImageId === img._id ? 'border-purple-600 ring-2 ring-purple-100' : 'border-transparent hover:border-gray-200'}`}
                                 >
                                     <img src={img.imageUrl} alt="" className="w-full h-full object-cover" />

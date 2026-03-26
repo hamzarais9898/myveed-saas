@@ -46,6 +46,9 @@ export interface Influencer {
     config: InfluencerConfig;
     photos: Array<{ imageUrl: string; prompt: string; createdAt: string }>;
     videos: Array<{ videoUrl: string; originalImageUrl: string; prompt: string; createdAt: string }>;
+    photosCount?: number;
+    videosCount?: number;
+    assetsCount?: number;
     createdAt: string;
 }
 
@@ -82,5 +85,12 @@ export const generateVideos = async (id: string, photoUrls: string[], count: num
 
 export const previewGenerateImage = async (config: any) => {
     const response = await axios.post(`${API_URL}/influencers/preview-image`, config, { headers: getHeaders() });
+    return response.data;
+};
+
+export const getInfluencerLibrary = async (id: string, page = 1, limit = 20, type?: string) => {
+    let url = `${API_URL}/influencers/${id}/library?page=${page}&limit=${limit}`;
+    if (type) url += `&type=${type}`;
+    const response = await axios.get(url, { headers: getHeaders() });
     return response.data;
 };

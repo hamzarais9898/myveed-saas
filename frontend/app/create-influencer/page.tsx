@@ -31,12 +31,7 @@ export default function AIInfluencerPage() {
     const [loading, setLoading] = useState(true);
     const [showCreateForm, setShowCreateForm] = useState(false);
 
-    const getAllAssets = (inf: influencerService.Influencer) => {
-        const photos = (inf.photos || []).map(p => ({ ...p, type: 'photo' }));
-        const videos = (inf.videos || []).map(v => ({ ...v, type: 'video', imageUrl: v.originalImageUrl, url: v.videoUrl })); // normalizing for display
-        // @ts-ignore
-        return [...photos, ...videos].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    };
+
 
     // Enhanced State for Native High-Fidelity Creator
     const [gender, setGender] = useState<'man' | 'woman'>('woman');
@@ -110,6 +105,15 @@ export default function AIInfluencerPage() {
     const [viewMode, setViewMode] = useState<'gallery' | 'videos'>('gallery');
     const [generatingContent, setGeneratingContent] = useState(false);
 
+    // Library State
+    const [libraryItems, setLibraryItems] = useState<any[]>([]);
+    const [libraryStats, setLibraryStats] = useState<any>(null);
+    const [libraryPage, setLibraryPage] = useState(1);
+    const [libraryHasMore, setLibraryHasMore] = useState(true);
+    const [libraryLoading, setLibraryLoading] = useState(false);
+    const [libraryTypeFilter, setLibraryTypeFilter] = useState<'all' | 'photo' | 'video'>('all');
+    const [selectedVideo, setSelectedVideo] = useState<any | null>(null);
+
     // Live Preview Debounce
     useEffect(() => {
         if (!showCreateForm) return;
@@ -146,6 +150,38 @@ export default function AIInfluencerPage() {
             setLoading(false);
         }
     };
+
+    const fetchLibrary = async (id: string, page = 1, type = libraryTypeFilter) => {
+        if (!id) return;
+        setLibraryLoading(true);
+        try {
+            const data = await influencerService.getInfluencerLibrary(id, page, 20, type === 'all' ? undefined : type);
+            if (data.success) {
+                if (page === 1) {
+                    setLibraryItems(data.items);
+                } else {
+                    setLibraryItems(prev => [...prev, ...data.items]);
+                }
+                setLibraryStats(data.stats);
+                setLibraryHasMore(data.pagination.page < data.pagination.pages);
+                setLibraryPage(page);
+            } else {
+                showToast(data.message || 'Erreur lors du chargement de la bibliothèque', 'error');
+            }
+        } catch (err) {
+            console.error('Failed to load library:', err);
+            showToast('Impossible de se connecter au serveur de bibliothèque', 'error');
+        } finally {
+            setLibraryLoading(false);
+        }
+    };
+
+    // Reload library when influencer or filter changes
+    useEffect(() => {
+        if (selectedInfluencer) {
+            fetchLibrary(selectedInfluencer._id, 1, libraryTypeFilter);
+        }
+    }, [selectedInfluencer, libraryTypeFilter]);
 
     useEffect(() => {
         loadInfluencers();
@@ -282,10 +318,11 @@ export default function AIInfluencerPage() {
                 eyes: { color: eyeColor }
             };
 
-            const result = await influencerService.previewGenerateImage(newConfig); // Assuming this is the correct service call
+            const result = await influencerService.generatePhotos(id, 20); // Correct endpoint: generatePhotos
             if (result.success) {
                 showToast('20 photos en cours de génération !', 'success');
                 loadInfluencers();
+                if (selectedInfluencer) fetchLibrary(selectedInfluencer._id, 1, libraryTypeFilter);
             }
         } catch (error: any) {
             const apiError = error.response?.data;
@@ -500,16 +537,12 @@ export default function AIInfluencerPage() {
                                         <div className="flex flex-col md:flex-row items-start gap-12 mb-16">
                                             <img src={selectedInfluencer.avatarUrl} className="w-44 h-44 rounded-[2.5rem] object-cover border-4 border-white shadow-xl" alt={selectedInfluencer.name} />
                                             <div className="flex-1">
-                                                <div className="flex items-center gap-4 mb-2">
-                                                    <h2 className="text-4xl font-black text-gray-900 tracking-tighter">{selectedInfluencer.name}</h2>
-                                                    <span className="px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-black rounded-lg uppercase">{selectedInfluencer.age} Ans</span>
-                                                </div>
                                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10 mt-8">
                                                     {[
-                                                        { label: 'Photos', value: selectedInfluencer.photos?.length || 0, icon: ImageIcon, color: 'text-blue-500' },
-                                                        { label: 'Vidéos', value: selectedInfluencer.videos?.length || 0, icon: Video, color: 'text-indigo-500' },
-                                                        { label: 'Reach', value: '1.2M', icon: Users, color: 'text-emerald-500' },
-                                                        { label: 'Engagement', value: '8.4%', icon: Sparkles, color: 'text-orange-500' }
+                                                        { label: 'Photos', value: libraryStats?.totalImages ?? 0, icon: ImageIcon, color: 'text-blue-500' },
+                                                        { label: 'Vidéos', value: libraryStats?.totalVideos ?? 0, icon: Video, color: 'text-indigo-500' },
+                                                        { label: 'Reach', value: '--', icon: Users, color: 'text-emerald-500' },
+                                                        { label: 'Engagement', value: '--', icon: Sparkles, color: 'text-orange-500' }
                                                     ].map((kpi, i) => (
                                                         <div key={i} className="bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
                                                             <kpi.icon className={`w-4 h-4 mb-2 ${kpi.color}`} />
@@ -535,48 +568,109 @@ export default function AIInfluencerPage() {
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="grid grid-cols-2 lg:grid-cols-5 gap-6">
-                                            {getAllAssets(selectedInfluencer).map((asset: any, i) => (
-                                                <motion.div key={i} whileHover={{ y: -5 }} className="aspect-[3/4] rounded-2xl overflow-hidden shadow-sm border border-gray-100 relative group">
-                                                    <img src={asset.imageUrl} className="w-full h-full object-cover" alt="asset" />
-                                                    {asset.type === 'video' && (
-                                                        <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-colors">
-                                                            <div className="w-10 h-10 rounded-full bg-white/30 backdrop-blur-md flex items-center justify-center text-white">
-                                                                <Play className="w-5 h-5 fill-white" />
-                                                            </div>
-                                                            <div className="absolute top-2 right-2 px-2 py-1 bg-black/50 rounded-lg text-[8px] font-bold text-white uppercase tracking-wider backdrop-blur-sm">
-                                                                Vidéo
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                    {asset.type === 'photo' && (
-                                                        <>
-                                                            <div className="absolute top-2 right-2 px-2 py-1 bg-black/50 rounded-lg text-[8px] font-bold text-white uppercase tracking-wider backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                Photo
-                                                            </div>
-                                                            <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/40 transition-all opacity-0 group-hover:opacity-100 p-4">
-                                                                <div className="flex flex-col gap-2 w-full max-w-[140px]">
-                                                                    <button
-                                                                        onClick={() => handleAnimateInfluencer(selectedInfluencer, asset.imageUrl)}
-                                                                        className="w-full px-4 py-2.5 bg-white text-black text-[8px] font-black uppercase tracking-widest rounded-xl shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 flex items-center justify-center gap-2 hover:bg-blue-600 hover:text-white"
-                                                                    >
-                                                                        <Video className="w-3 h-3" />
-                                                                        {t('influencers.generateVideo')}
-                                                                    </button>
-                                                                    <button
-                                                                        onClick={() => handleGenerateInfluencerPhoto(selectedInfluencer, asset.imageUrl)}
-                                                                        className="w-full px-4 py-2.5 bg-black text-white text-[8px] font-black uppercase tracking-widest rounded-xl shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 flex items-center justify-center gap-2 hover:bg-indigo-600"
-                                                                    >
-                                                                        <ImageIcon className="w-3 h-3" />
-                                                                        Générer Photo
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        </>
-                                                    )}
-                                                </motion.div>
-                                            ))}
+
+                                        {/* Library Header */}
+                                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
+                                            <h3 className="text-2xl font-black text-gray-900 tracking-tighter">Bibliothèque de Contenus</h3>
+                                            <div className="flex bg-gray-100 p-1.5 rounded-xl border border-gray-200">
+                                                {['all', 'photo', 'video'].map((type) => (
+                                                    <button
+                                                        key={type}
+                                                        onClick={() => setLibraryTypeFilter(type as any)}
+                                                        className={`px-6 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${
+                                                            libraryTypeFilter === type ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-400 hover:text-gray-600'
+                                                        }`}
+                                                    >
+                                                        {type === 'all' ? 'Tout' : type === 'photo' ? 'Photos' : 'Vidéos'}
+                                                    </button>
+                                                ))}
+                                            </div>
                                         </div>
+
+                                        {libraryLoading && libraryPage === 1 ? (
+                                            <div className="flex items-center justify-center py-12">
+                                                <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+                                            </div>
+                                        ) : libraryItems.length === 0 ? (
+                                            <div className="text-center py-24 bg-gray-50 border-2 border-dashed border-gray-200 rounded-[2rem]">
+                                                <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">Aucun contenu trouvé</p>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <div className="grid grid-cols-2 lg:grid-cols-5 gap-6">
+                                                    {libraryItems.map((asset: any) => (
+                                                        <motion.div 
+                                                            key={asset.id} 
+                                                            whileHover={{ y: -5 }} 
+                                                            className={`aspect-[3/4] rounded-2xl overflow-hidden shadow-sm border border-gray-100 relative group transition-all duration-300 ${
+                                                                asset.type === 'video' 
+                                                                    ? (asset.videoUrl ? 'cursor-pointer hover:shadow-xl hover:border-blue-200' : 'cursor-wait opacity-80') 
+                                                                    : 'cursor-default'
+                                                            }`}
+                                                            onClick={() => {
+                                                                if (asset.type === 'video') {
+                                                                    if (asset.videoUrl) {
+                                                                        setSelectedVideo(asset);
+                                                                    } else if (asset.status === 'processing' || asset.status === 'generating') {
+                                                                        showToast('Vidéo en cours de génération...', 'info');
+                                                                    } else {
+                                                                        showToast('Vidéo non disponible', 'error');
+                                                                    }
+                                                                }
+                                                            }}
+                                                        >
+                                                            <img src={asset.imageUrl} className="w-full h-full object-cover" alt="asset" />
+                                                            {asset.type === 'video' && (
+                                                                <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-colors">
+                                                                    <div className="w-10 h-10 rounded-full bg-white/30 backdrop-blur-md flex items-center justify-center text-white">
+                                                                        <Play className="w-5 h-5 fill-white" />
+                                                                    </div>
+                                                                    <div className="absolute top-2 right-2 px-2 py-1 bg-black/50 rounded-lg text-[8px] font-bold text-white uppercase tracking-wider backdrop-blur-sm shadow-sm flex items-center gap-1">
+                                                                        {asset.status === 'processing' || asset.status === 'generating' ? <Loader2 className="w-2 h-2 animate-spin" /> : <Video className="w-2 h-2" />} Vidéo
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                            {asset.type === 'photo' && (
+                                                                <>
+                                                                    <div className="absolute top-2 right-2 px-2 py-1 bg-black/50 rounded-lg text-[8px] font-bold text-white uppercase tracking-wider backdrop-blur-sm shadow-sm flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                        <ImageIcon className="w-2 h-2" /> Photo
+                                                                    </div>
+                                                                    <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/40 transition-all opacity-0 group-hover:opacity-100 p-4">
+                                                                        <div className="flex flex-col gap-2 w-full max-w-[140px]">
+                                                                            <button
+                                                                                onClick={() => selectedInfluencer && handleAnimateInfluencer(selectedInfluencer, asset.imageUrl)}
+                                                                                className="w-full px-4 py-2.5 bg-white text-black text-[8px] font-black uppercase tracking-widest rounded-xl shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 flex items-center justify-center gap-2 hover:bg-blue-600 hover:text-white"
+                                                                            >
+                                                                                <Video className="w-3 h-3" />
+                                                                                Animer
+                                                                            </button>
+                                                                            <button
+                                                                                onClick={() => selectedInfluencer && handleGenerateInfluencerPhoto(selectedInfluencer, asset.imageUrl)}
+                                                                                className="w-full px-4 py-2.5 bg-black text-white text-[8px] font-black uppercase tracking-widest rounded-xl shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 flex items-center justify-center gap-2 hover:bg-indigo-600"
+                                                                            >
+                                                                                <ImageIcon className="w-3 h-3" />
+                                                                                Variante
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </>
+                                                            )}
+                                                        </motion.div>
+                                                    ))}
+                                                </div>
+                                                {libraryHasMore && (
+                                                    <div className="mt-8 flex justify-center">
+                                                        <button 
+                                                            onClick={() => selectedInfluencer && fetchLibrary(selectedInfluencer._id, libraryPage + 1, libraryTypeFilter)}
+                                                            disabled={libraryLoading}
+                                                            className="px-8 py-3 bg-gray-50 hover:bg-gray-100 text-gray-900 rounded-xl text-xs font-black uppercase tracking-widest transition-all shadow-sm"
+                                                        >
+                                                            {libraryLoading ? 'Chargement...' : 'Voir plus'}
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </>
+                                        )}
                                     </motion.div>
                                 ) : (
                                     <div className="flex flex-col gap-8">
@@ -634,10 +728,12 @@ export default function AIInfluencerPage() {
                                                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
                                                             <div className="absolute bottom-6 left-6 right-6 text-white text-center">
                                                                 <h3 className="text-[10px] font-black uppercase tracking-widest mb-1">{inf.name}</h3>
-                                                                <p className="text-[7px] font-bold uppercase tracking-widest text-white/50">{inf.photos?.length || 0} {t('influencers.assets')}</p>
+                                                                <p className="text-[7px] font-bold uppercase tracking-widest text-white/50">
+                                                                    {(inf as any).photosCount || 0}P • {(inf as any).videosCount || 0}V
+                                                                </p>
                                                             </div>
-                                                            <div className="absolute top-4 left-4 w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-[10px] font-black text-white shadow-lg border border-blue-400">
-                                                                {(inf.photos?.length || 0) + (inf.videos?.length || 0)}
+                                                            <div className="absolute top-4 left-4 min-w-[24px] h-6 px-1.5 bg-blue-600 rounded-full flex items-center justify-center text-[9px] font-black text-white shadow-lg border border-blue-400">
+                                                                {(inf as any).assetsCount || 0}
                                                             </div>
                                                             <button onClick={(e) => { e.stopPropagation(); handleDelete(inf._id); }} className="absolute top-4 right-4 p-3 bg-red-500/10 text-red-500 rounded-xl opacity-0 group-hover:opacity-100 transition-all hover:bg-red-500 hover:text-white">
                                                                 <Trash2 className="w-3.5 h-3.5" />
@@ -657,6 +753,11 @@ export default function AIInfluencerPage() {
                         </div>
                     </div>
                 </main>
+
+                <VideoPreviewModal
+                    video={selectedVideo}
+                    onClose={() => setSelectedVideo(null)}
+                />
 
                 <AdvancedStudioModal
                     isOpen={showAdvancedStudio}
@@ -734,6 +835,97 @@ export default function AIInfluencerPage() {
         </ProtectedRoute >
     );
 }
+
+const VideoPreviewModal = ({ video, onClose }: { video: any, onClose: () => void }) => {
+    return (
+        <AnimatePresence>
+            {video && (
+                <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 md:p-8 bg-black/80 backdrop-blur-md" onClick={onClose}>
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                        className="bg-[#111] rounded-[2.5rem] overflow-hidden max-w-5xl w-full shadow-2xl relative border border-white/10 flex flex-col md:flex-row h-auto md:max-h-[85vh]"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <button
+                            onClick={onClose}
+                            className="absolute top-6 right-6 p-4 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all z-20 backdrop-blur-md group"
+                        >
+                            <X className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
+                        </button>
+
+                        {/* Video Player Side */}
+                        <div className="flex-[2] bg-black aspect-video md:aspect-auto flex items-center justify-center relative overflow-hidden">
+                            <video
+                                src={video.videoUrl}
+                                controls
+                                autoPlay
+                                className="w-full h-full object-contain"
+                            />
+                            {/* Glow effect behind video */}
+                            <div className="absolute inset-0 bg-blue-500/5 pointer-events-none" />
+                        </div>
+
+                        {/* Info / Metadata Side */}
+                        <div className="flex-1 p-8 md:p-10 flex flex-col justify-between border-l border-white/5 bg-gradient-to-br from-[#161616] to-[#0a0a0a]">
+                            <div>
+                                <div className="flex items-center gap-3 mb-8">
+                                    <div className="p-3 bg-blue-500/20 rounded-2xl">
+                                        <Video className="w-5 h-5 text-blue-400" />
+                                    </div>
+                                    <div>
+                                        <span className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] block">Sora v2 Engine</span>
+                                        <span className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">High-Fidelity Render</span>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-8">
+                                    <div>
+                                        <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.15em] mb-3 flex items-center gap-2">
+                                            <Sparkles className="w-3 h-3 text-orange-400" /> Prompt Créatif
+                                        </h3>
+                                        <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+                                            <p className="text-sm text-gray-300 font-medium leading-relaxed italic">
+                                                "{video.promptText || 'Scène générée via le studio IA Influencer'}"
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-6">
+                                        <div className="space-y-1">
+                                            <h3 className="text-[8px] font-black text-gray-500 uppercase tracking-widest">État du Rendu</h3>
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                                                <span className="text-[10px] font-black text-emerald-500 uppercase tracking-wider">{video.status || 'COMPLETED'}</span>
+                                            </div>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <h3 className="text-[8px] font-black text-gray-500 uppercase tracking-widest">Résolution</h3>
+                                            <span className="text-[10px] font-black text-gray-300 uppercase tracking-wider">4K Ultra HD</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <h3 className="text-[8px] font-black text-gray-500 uppercase tracking-widest">ID Unique</h3>
+                                        <span className="text-[8px] font-mono text-gray-600 break-all">{video.id}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={onClose}
+                                className="mt-12 w-full py-5 bg-white text-black rounded-[1.25rem] font-black uppercase tracking-widest text-[10px] hover:bg-gray-200 transition-all shadow-xl shadow-white/5 active:scale-95"
+                            >
+                                Fermer le lecteur
+                            </button>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
+        </AnimatePresence>
+    );
+};
 
 const AdvancedStudioModal = ({ isOpen, onClose, t, gender, setGender, skinTone, setSkinTone, eyeColor, setEyeColor, hairColor, setHairColor, hairStyle, setHairStyle, hairLength, setHairLength, age, setAge, name, setName, previewImage, isLoading, onGenerate, onSave, aesthetic, setAesthetic }: any) => {
     if (!isOpen) return null;

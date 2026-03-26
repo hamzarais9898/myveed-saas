@@ -808,6 +808,15 @@ function GenerateContent() {
                                                             setSelectedImageId(img.id);
                                                             setSelectedImageForVideo(img.url);
                                                             setDetectedMultipleFiles([]);
+                                                            if (img.sourceType === 'influencer' && img.influencerId) {
+                                                                setSelectedSourceType('influencer');
+                                                                setSelectedInfluencerId(img.influencerId);
+                                                                setSelectedInfluencerName(img.influencerName || 'Influenceur');
+                                                            } else {
+                                                                setSelectedSourceType(img.sourceType as any || 'image');
+                                                                setSelectedInfluencerId(null);
+                                                                setSelectedInfluencerName(null);
+                                                            }
                                                         }}
                                                     />
                                                 </div>
