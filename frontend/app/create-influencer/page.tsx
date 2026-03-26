@@ -1026,6 +1026,14 @@ const AdvancedStudioModal = ({ isOpen, onClose, t, gender, setGender, skinTone, 
                                     <p className="text-[10px] font-black uppercase tracking-[0.2em]">{t('influencers.studio.previewEmpty')}</p>
                                 </div>
                             )}
+                            {previewImage && !isLoading && (
+                                <div className="absolute top-4 left-4 flex flex-col gap-2">
+                                    <div className="px-3 py-1.5 bg-black/60 backdrop-blur-md rounded-full border border-white/20 flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
+                                        <span className="text-[8px] font-black text-white uppercase tracking-widest">Identity Engine Active</span>
+                                    </div>
+                                </div>
+                            )}
                             {isLoading && (
                                 <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center">
                                     <PremiumLoading stage="Gemini Banana V3" subtext="Reconstruction faciale..." />

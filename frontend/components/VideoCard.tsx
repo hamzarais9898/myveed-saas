@@ -296,7 +296,7 @@ export default function VideoCard({ video, onDelete, onUpdate, tiktokAccounts, s
                         {current.label}
                     </span>
                     {['generating', 'transcribing', 'editing', 'finishing', 'publishing'].includes(video.status) && (
-                        <span className="text-[10px] font-black text-gray-400 bg-white/50 backdrop-blur-sm px-1.5 py-0.5 rounded-md">
+                        <span className="text-[11px] font-extrabold text-purple-700 bg-white shadow-sm px-2 py-0.5 rounded-lg border border-purple-100 flex items-center justify-center min-w-[36px]">
                             {normalizeProgress(video.progress)}%
                         </span>
                     )}
@@ -315,14 +315,19 @@ export default function VideoCard({ video, onDelete, onUpdate, tiktokAccounts, s
                 </div>
 
                 {['generating', 'transcribing', 'editing', 'finishing'].includes(video.status) && (
-                    <div className="flex gap-1 px-1 w-20">
+                    <div className="flex gap-1.5 px-1 w-24 h-1.5 mt-0.5">
                         {['generating', 'transcribing', 'editing', 'finishing'].map((s, i) => {
                             const steps = ['generating', 'transcribing', 'editing', 'finishing'];
                             const currentIndex = steps.indexOf(video.status);
+                            const isActive = i <= currentIndex;
                             return (
                                 <div
                                     key={s}
-                                    className={`h-1 flex-1 rounded-full transition-all duration-500 ${i <= currentIndex ? 'bg-purple-500 shadow-[0_0_5px_rgba(168,85,247,0.5)]' : 'bg-white/50'}`}
+                                    className={`h-full flex-1 rounded-full transition-all duration-700 ${
+                                        isActive 
+                                            ? 'bg-gradient-to-r from-purple-500 to-indigo-600 shadow-[0_0_8px_rgba(168,85,247,0.6)] scale-y-110' 
+                                            : 'bg-gray-200/60'
+                                    }`}
                                 />
                             );
                         })}

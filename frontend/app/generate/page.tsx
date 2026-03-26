@@ -108,6 +108,16 @@ function GenerateContent() {
     const [promptBeforeSpeech, setPromptBeforeSpeech] = useState('');
     const { isListening, transcript, toggleListening, error: sttError } = useSpeechToText({ lang: 'fr-FR' });
 
+    // Ref for scrolling to top
+    const topRef = useRef<HTMLDivElement>(null);
+
+    const scrollToResults = () => {
+        // Small delay to ensure the UI has updated (e.g. loading state / results are rendering)
+        requestAnimationFrame(() => {
+            topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    };
+
     // Factorized clearing logic
     const clearInfluencerReference = () => {
         setSelectedImageForVideo(null);
@@ -315,6 +325,9 @@ function GenerateContent() {
         if (!promptText.trim() || loading) return;
         setLoading(true);
         setError('');
+        
+        // Scroll to top to see progress/preview
+        scrollToResults();
 
         // Simulate Preview Generation Time
         setTimeout(() => {
@@ -347,6 +360,9 @@ function GenerateContent() {
         setLoading(true);
         setGeneratedVideos([]);
         setGeneratedImages([]);
+
+        // Scroll to top to see progress/results
+        scrollToResults();
 
         try {
             if (generationMode === 'video') {
@@ -507,7 +523,7 @@ function GenerateContent() {
         setGenerationMode('video');
         setPromptText(t('generation.animatePrompt'));
         // Scroll to top
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        scrollToResults();
     };
 
     const handleDownload = (imageUrl: string, promptText: string) => {
@@ -523,7 +539,7 @@ function GenerateContent() {
 
     return (
         <ProtectedRoute>
-            <div className="min-h-screen bg-gray-50/50">
+            <div className="min-h-screen bg-gray-50/50" ref={topRef}>
                 <Navbar />
 
                 <div className="max-w-7xl mx-auto px-6 py-12">
@@ -771,10 +787,11 @@ function GenerateContent() {
                                                                     Identity Lock Active
                                                                 </span>
                                                             </div>
-                                                            <div className="px-3 py-1 bg-black/60 backdrop-blur-sm rounded-lg border border-white/10">
+                                                            <div className="px-3 py-1.5 bg-black/60 backdrop-blur-sm rounded-lg border border-white/10 flex items-center gap-2">
                                                                 <span className="text-[9px] font-medium text-white/90">
-                                                                    {selectedInfluencerName || 'Influencer'} : l'identité sera préservée à 100%
+                                                                    {selectedInfluencerName || 'Influencer'} locked. Physical identity stays identical. 
                                                                 </span>
+                                                                <span className="text-[8px] text-blue-400 font-bold uppercase tracking-tighter">Cultural-Ready</span>
                                                             </div>
                                                         </div>
                                                     )}

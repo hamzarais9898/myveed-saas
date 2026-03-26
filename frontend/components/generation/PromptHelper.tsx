@@ -9,7 +9,11 @@ interface PromptHelperProps {
 }
 
 const FORBIDDEN_WORDS = ['ronaldo', 'messi', 'elon', 'musk', 'war', 'blood', 'kill', 'murder', 'weapon', 'gun', 'violent', 'violence'];
-const SHORT_PROMPT_THRESHOLD = 5; // words
+const CULTURAL_TERMS = [
+  'jellaba', 'djellaba', 'caftan', 'kaftan', 'gandoura', 'takchita', 'abaya', 'khamis', 'qamis', 
+  'burnous', 'fez', 'boubou', 'dashiki', 'kimono', 'sari', 'hijab', 'turban', 'melhafa', 'haik', 'tarbouche'
+];
+const SHORT_PROMPT_THRESHOLD = 4; // words
 
 export default function PromptHelper({ promptText, onPromptChange }: PromptHelperProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -31,6 +35,14 @@ export default function PromptHelper({ promptText, onPromptChange }: PromptHelpe
 
     if (foundForbidden) {
       setWarningMessage("⚠️ This prompt may be rejected. Avoid real names or sensitive words. Try rephrasing.");
+      return;
+    }
+
+    // Check for cultural terms (Identity Preservation Hint)
+    const detectedTerm = CULTURAL_TERMS.find(term => words.some(word => word.includes(term.toLowerCase())));
+
+    if (detectedTerm) {
+      setWarningMessage(`🔒 Identity Lock: We've detected "${detectedTerm}". Your influencer's physical identity is strictly locked; only the outfit and scene will change.`);
       return;
     }
 
@@ -67,8 +79,8 @@ export default function PromptHelper({ promptText, onPromptChange }: PromptHelpe
             <Lightbulb className="w-5 h-5" />
           </div>
           <div className="text-left">
-            <h3 className="font-black text-gray-900 text-lg">🎬 Write better prompts, get better videos</h3>
-            <p className="text-sm text-gray-500 font-medium">Tips and tricks for optimal AI generation</p>
+            <h3 className="font-black text-gray-900 text-lg">🎬 Master the prompt, master the identity</h3>
+            <p className="text-sm text-gray-500 font-medium">Tips for high-end AI influencer generation</p>
           </div>
         </div>
         <div className="p-2 text-indigo-400 bg-indigo-50 rounded-full group-hover:bg-indigo-100 transition-colors">
@@ -151,7 +163,7 @@ export default function PromptHelper({ promptText, onPromptChange }: PromptHelpe
                 <h4 className="font-black text-blue-800 uppercase tracking-widest text-sm">Pro tips</h4>
               </div>
               <p className="text-sm text-blue-700 leading-relaxed font-medium">
-                Keep prompts between 1–3 sentences. Think like a movie director: add details to guide the AI (clothes, emotions, environment), use styles like "cinematic", "realistic", "animated". Avoid copyrighted identities.
+                Keep prompts concise (1–2 sentences). Describe the scene, outfit, and mood. Avoid adding names or physical traits that might conflict with the influencer's locked identity.
               </p>
             </div>
             
