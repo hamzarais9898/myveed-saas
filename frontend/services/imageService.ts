@@ -132,3 +132,14 @@ export const generateVideoFromImage = async (
     );
     return response.data;
 };
+
+/**
+ * Download image
+ */
+export const downloadImage = async (imageId: string) => {
+    const token = localStorage.getItem('token');
+    const response = await axios.get(`${API_URL}/images/download/${imageId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+};

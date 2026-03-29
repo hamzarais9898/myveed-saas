@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { saveAs } from 'file-saver';
+import { getMaveedFilename } from '@/utils/downloadHelper';
 import ScheduleModal from './ScheduleModal';
 import { downloadVideo, cancelSchedule, getVideoStatus } from '@/services/videoService';
 import { publishFacebookVideo, publishYouTube, publishToTikTok, getTikTokStatus } from '@/services/publishService';
@@ -246,7 +247,9 @@ export default function VideoCard({ video, onDelete, onUpdate, tiktokAccounts, s
         setError('');
         try {
             const response = await downloadVideo(video.id || video._id);
-            saveAs(response.downloadUrl, response.filename);
+            const influencerName = video.influencerName || 'video';
+            const filename = getMaveedFilename(influencerName, 'video', video.id || video._id);
+            saveAs(response.downloadUrl, filename);
         } catch (err: any) {
             setError(err.response?.data?.message || 'Erreur de téléchargement');
         } finally {
@@ -323,11 +326,10 @@ export default function VideoCard({ video, onDelete, onUpdate, tiktokAccounts, s
                             return (
                                 <div
                                     key={s}
-                                    className={`h-full flex-1 rounded-full transition-all duration-700 ${
-                                        isActive 
-                                            ? 'bg-gradient-to-r from-purple-500 to-indigo-600 shadow-[0_0_8px_rgba(168,85,247,0.6)] scale-y-110' 
+                                    className={`h-full flex-1 rounded-full transition-all duration-700 ${isActive
+                                            ? 'bg-gradient-to-r from-purple-500 to-indigo-600 shadow-[0_0_8px_rgba(168,85,247,0.6)] scale-y-110'
                                             : 'bg-gray-200/60'
-                                    }`}
+                                        }`}
                                 />
                             );
                         })}
@@ -383,7 +385,7 @@ export default function VideoCard({ video, onDelete, onUpdate, tiktokAccounts, s
                             <div className="flex items-center justify-between text-[10px] font-medium text-white/80">
                                 <span className="flex items-center gap-1.5 uppercase tracking-tight bg-white/20 px-2 py-0.5 rounded backdrop-blur-md text-[9px] font-black border border-white/10">
                                     {(video.outputAspectRatio === '16:9' || video.format === 'youtube') ? <YouTubeIcon className="w-3 h-3" /> : (video.outputAspectRatio === '9:16' || video.format === 'short') ? <ShortsIcon className="w-3 h-3" /> : '🎬'}
-                                    {video.outputAspectRatio || (video.format === 'youtube' ? '16:9' : '9:16')} 
+                                    {video.outputAspectRatio || (video.format === 'youtube' ? '16:9' : '9:16')}
                                     <span className="opacity-60 ml-1 border-l border-white/20 pl-1">
                                         {video.outputOrientation === 'portrait' ? 'PORTRAIT' : video.outputOrientation === 'landscape' ? 'PAYSAGE' : (video.format === 'youtube' ? 'PAYSAGE' : 'PORTRAIT')}
                                     </span>

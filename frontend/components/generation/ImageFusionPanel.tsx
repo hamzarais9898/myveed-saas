@@ -43,6 +43,26 @@ export default function ImageFusionPanel() {
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // --- Initial Load from Session Logic (Context Sync) ---
+  useEffect(() => {
+    const source = sessionStorage.getItem('generateSourceType');
+    const imageUrl = sessionStorage.getItem('generateInfluencerImageUrl');
+    const influencerId = sessionStorage.getItem('generateInfluencerId');
+
+    if (source === 'influencer' && imageUrl && influencerId) {
+      setSelectedImages([{
+        id: influencerId,
+        url: imageUrl,
+        source: 'gallery',
+        type: 'influencer'
+      }]);
+      
+      // Cleanup to avoid reloading it again on refresh
+      sessionStorage.removeItem('generateSourceType');
+      // Keep name if needed for other components, but clear the main markers
+    }
+  }, []);
+
   // --- Gallery Logic ---
   const loadGallery = async () => {
     setLoadingGallery(true);

@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, Download as DownloadIcon, Trash2 as TrashIcon, Wand2 } from 'lucide-react';
+import { downloadResource, getMaveedFilename } from '@/utils/downloadHelper';
+import { downloadImage } from '@/services/imageService';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -17,23 +19,51 @@ export default function PhotoCard({ photo, onDelete, compact = false }: PhotoCar
     const { t } = useLanguage();
     const [downloading, setDownloading] = useState(false);
 
-    const handleDownload = () => {
+    const handleDownload = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (downloading) return;
+        
         setDownloading(true);
-        const link = document.createElement('a');
-        link.href = photo.imageUrl;
-        link.download = `maveed-photo-${photo.id}.png`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        setTimeout(() => setDownloading(false), 500);
+        try {
+            const imageId = photo.id || photo._id;
+            // 1. Get verified download info from backend (mirroring VideoCard pattern)
+            const downloadData = await downloadImage(imageId);
+            
+            if (downloadData.success && downloadData.downloadUrl) {
+                const influencerName = photo.influencerName || 'photo';
+                const filename = getMaveedFilename(influencerName, 'photo', imageId);
+                // 2. Trigger the robust download via our enhanced helper (includes fl_attachment injection)
+                await downloadResource(downloadData.downloadUrl, filename);
+            } else {
+                throw new Error('Could not get download link');
+            }
+        } catch (err) {
+            console.error('Download error:', err);
+            // Fallback to direct URL if backend fails for any reason
+            const influencerName = photo.influencerName || 'photo';
+            const filename = getMaveedFilename(influencerName, 'photo', photo.id || photo._id);
+            await downloadResource(photo.imageUrl, filename);
+        } finally {
+            setDownloading(false);
+        }
     };
 
     const handleAnimate = () => {
         const imageUrl = photo.imageUrl || photo.url || photo.image || '';
         if (!imageUrl) return;
-        // Store image URL in sessionStorage to avoid URL length issues with Next.js router
-        sessionStorage.setItem('animateImageUrl', imageUrl);
-        router.push('/generate?mode=image-to-video');
+
+        // Enhanced logic: if it belongs to an influencer, lock the identity
+        if (photo.influencerId || photo.sourceType === 'influencer') {
+            sessionStorage.setItem('animateSourceType', 'influencer');
+            sessionStorage.setItem('animateInfluencerId', photo.influencerId || photo.id);
+            sessionStorage.setItem('animateInfluencerName', photo.influencerName || 'Influenceur');
+            sessionStorage.setItem('animateInfluencerImageUrl', imageUrl);
+            router.push('/generate?mode=image-to-video&source=influencer');
+        } else {
+            // Standard image-to-video
+            sessionStorage.setItem('animateImageUrl', imageUrl);
+            router.push('/generate?mode=image-to-video');
+        }
     };
 
     return (

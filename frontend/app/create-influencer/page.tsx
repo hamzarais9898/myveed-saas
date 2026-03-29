@@ -9,8 +9,9 @@ import {
     User, Dna, Save, Wand2, RefreshCw, Sparkles, ScanFace,
     Search, X, Loader2, CheckCircle, ArrowRight, Plus,
     Video, Trash2, Users, Camera, Smile, Eye, Scissors,
-    Check, Play, LayoutGrid, Layout, Image as ImageIcon, Target
+    Check, Play, LayoutGrid, Layout, Image as ImageIcon, Target, Download, DownloadCloud, Megaphone
 } from 'lucide-react';
+import { downloadResource, getMaveedFilename } from '@/utils/downloadHelper';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import * as influencerService from '@/services/influencerService';
@@ -113,6 +114,8 @@ export default function AIInfluencerPage() {
     const [libraryLoading, setLibraryLoading] = useState(false);
     const [libraryTypeFilter, setLibraryTypeFilter] = useState<'all' | 'photo' | 'video'>('all');
     const [selectedVideo, setSelectedVideo] = useState<any | null>(null);
+    const [downloadingId, setDownloadingId] = useState<string | null>(null);
+    const [showAdModal, setShowAdModal] = useState(false);
 
     // Live Preview Debounce
     useEffect(() => {
@@ -559,6 +562,13 @@ export default function AIInfluencerPage() {
                                                         {t('influencers.generateVideo')}
                                                     </button>
                                                     <button
+                                                        onClick={() => setShowAdModal(true)}
+                                                        className="px-8 py-4 bg-white border border-blue-100 text-blue-600 font-black rounded-2xl text-[9px] uppercase tracking-widest transition-all hover:scale-105 shadow-xl shadow-blue-50"
+                                                    >
+                                                        <Megaphone className="w-3 h-3 inline-block mr-2" />
+                                                        Générer Publicité
+                                                    </button>
+                                                    <button
                                                         onClick={() => handleGenerateInfluencerPhoto(selectedInfluencer)}
                                                         className="px-8 py-4 bg-black text-white font-black rounded-2xl text-[9px] uppercase tracking-widest transition-all hover:scale-105 shadow-xl"
                                                     >
@@ -644,13 +654,29 @@ export default function AIInfluencerPage() {
                                                                                 <Video className="w-3 h-3" />
                                                                                 Animer
                                                                             </button>
-                                                                            <button
-                                                                                onClick={() => selectedInfluencer && handleGenerateInfluencerPhoto(selectedInfluencer, asset.imageUrl)}
-                                                                                className="w-full px-4 py-2.5 bg-black text-white text-[8px] font-black uppercase tracking-widest rounded-xl shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 flex items-center justify-center gap-2 hover:bg-indigo-600"
-                                                                            >
-                                                                                <ImageIcon className="w-3 h-3" />
-                                                                                Variante
-                                                                            </button>
+                                                                                <div className="grid grid-cols-2 gap-2 w-full">
+                                                                                    <button
+                                                                                        onClick={(e) => { e.stopPropagation(); selectedInfluencer && handleGenerateInfluencerPhoto(selectedInfluencer, asset.imageUrl); }}
+                                                                                        className="w-full px-2 py-2.5 bg-black text-white text-[8px] font-black uppercase tracking-widest rounded-xl shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 flex items-center justify-center gap-1.5 hover:bg-indigo-600"
+                                                                                    >
+                                                                                        <ImageIcon className="w-3 h-3" />
+                                                                                        Variante
+                                                                                    </button>
+                                                                                    <button
+                                                                                        onClick={async (e) => {
+                                                                                            e.stopPropagation();
+                                                                                            if (!selectedInfluencer) return;
+                                                                                            setDownloadingId(asset.id);
+                                                                                            const filename = getMaveedFilename(selectedInfluencer.name, 'photo', asset.id);
+                                                                                            await downloadResource(asset.imageUrl, filename);
+                                                                                            setDownloadingId(null);
+                                                                                        }}
+                                                                                        className="w-full px-2 py-2.5 bg-blue-600 text-white text-[8px] font-black uppercase tracking-widest rounded-xl shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 flex items-center justify-center gap-1.5 hover:bg-blue-700"
+                                                                                    >
+                                                                                        {downloadingId === asset.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Download className="w-3 h-3" />}
+                                                                                        Save
+                                                                                    </button>
+                                                                                </div>
                                                                         </div>
                                                                     </div>
                                                                 </>
@@ -822,6 +848,27 @@ export default function AIInfluencerPage() {
                     hairLength={hairLength} setHairLength={setHairLength}
                 />
 
+                <AdChoiceModal
+                    isOpen={showAdModal}
+                    onClose={() => setShowAdModal(false)}
+                    onChoice={(type) => {
+                        if (selectedInfluencer) {
+                            sessionStorage.setItem('generationIntent', 'advertisement');
+                            if (type === 'video') {
+                                handleAnimateInfluencer(selectedInfluencer);
+                            } else {
+                                // Redirection vers Fusion d'image pour les publicités photo
+                                sessionStorage.setItem('generateSourceType', 'influencer');
+                                sessionStorage.setItem('generateInfluencerId', selectedInfluencer._id);
+                                sessionStorage.setItem('generateInfluencerName', selectedInfluencer.name);
+                                sessionStorage.setItem('generateInfluencerImageUrl', selectedInfluencer.avatarUrl || '');
+                                router.push('/image-fusion?source=influencer&intent=advertisement');
+                            }
+                            setShowAdModal(false);
+                        }
+                    }}
+                />
+
                 <Footer />
 
                 {
@@ -837,6 +884,7 @@ export default function AIInfluencerPage() {
 }
 
 const VideoPreviewModal = ({ video, onClose }: { video: any, onClose: () => void }) => {
+    const [isDownloadingVideo, setIsDownloadingVideo] = useState(false);
     return (
         <AnimatePresence>
             {video && (
@@ -913,12 +961,29 @@ const VideoPreviewModal = ({ video, onClose }: { video: any, onClose: () => void
                                 </div>
                             </div>
 
-                            <button
-                                onClick={onClose}
-                                className="mt-12 w-full py-5 bg-white text-black rounded-[1.25rem] font-black uppercase tracking-widest text-[10px] hover:bg-gray-200 transition-all shadow-xl shadow-white/5 active:scale-95"
-                            >
-                                Fermer le lecteur
-                            </button>
+                                <div className="mt-12 flex flex-col sm:flex-row gap-4">
+                                    <button
+                                        onClick={async () => {
+                                            if (!video.videoUrl) return;
+                                            setIsDownloadingVideo(true);
+                                            const influencerName = video.promptText ? video.promptText.slice(0, 15) : 'video';
+                                            const filename = getMaveedFilename(influencerName, 'video', video.id || video._id);
+                                            await downloadResource(video.videoUrl, filename);
+                                            setIsDownloadingVideo(false);
+                                        }}
+                                        disabled={isDownloadingVideo}
+                                        className="flex-[2] py-5 bg-blue-600 text-white rounded-[1.25rem] font-black uppercase tracking-widest text-[10px] hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/20 active:scale-95 flex items-center justify-center gap-3"
+                                    >
+                                        {isDownloadingVideo ? <Loader2 className="w-4 h-4 animate-spin" /> : <DownloadCloud className="w-4 h-4" />}
+                                        Télécharger la vidéo
+                                    </button>
+                                    <button
+                                        onClick={onClose}
+                                        className="flex-1 py-5 bg-white/5 border border-white/10 text-white rounded-[1.25rem] font-black uppercase tracking-widest text-[10px] hover:bg-white/10 transition-all active:scale-95"
+                                    >
+                                        Fermer
+                                    </button>
+                                </div>
                         </div>
                     </motion.div>
                 </div>
@@ -1052,6 +1117,63 @@ const AdvancedStudioModal = ({ isOpen, onClose, t, gender, setGender, skinTone, 
                             </div>
                         )}
                     </div>
+                </div>
+            </motion.div>
+        </div>
+    );
+};
+
+const AdChoiceModal = ({ isOpen, onClose, onChoice }: { isOpen: boolean, onClose: () => void, onChoice: (type: 'photo' | 'video') => void }) => {
+    if (!isOpen) return null;
+    return (
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xl" onClick={onClose}>
+            <motion.div 
+                initial={{ opacity: 0, scale: 0.9, y: 20 }} 
+                animate={{ opacity: 1, scale: 1, y: 0 }} 
+                className="bg-white rounded-[3.5rem] p-10 max-w-2xl w-full shadow-2xl relative border border-white/20"
+                onClick={e => e.stopPropagation()}
+            >
+                <button onClick={onClose} className="absolute top-8 right-8 p-3 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-all">
+                    <X className="w-5 h-5 text-gray-400" />
+                </button>
+
+                <div className="text-center mb-10">
+                    <h2 className="text-3xl font-black text-gray-900 tracking-tighter mb-2">Choisir le Format Publicitaire</h2>
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest italic">Boostez votre reach avec des créations IA sur mesure</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <button 
+                        onClick={() => onChoice('photo')}
+                        className="group p-8 bg-gray-50 rounded-[2.5rem] border-2 border-transparent hover:border-blue-600 transition-all text-center flex flex-col items-center gap-4 hover:shadow-2xl hover:bg-white"
+                    >
+                        <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all">
+                            <ImageIcon className="w-8 h-8" />
+                        </div>
+                        <div>
+                            <span className="text-sm font-black text-gray-900 block uppercase">Publicité Photo</span>
+                            <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Format Statique HD</span>
+                        </div>
+                    </button>
+
+                    <button 
+                        onClick={() => onChoice('video')}
+                        className="group p-8 bg-gray-50 rounded-[2.5rem] border-2 border-transparent hover:border-indigo-600 transition-all text-center flex flex-col items-center gap-4 hover:shadow-2xl hover:bg-white"
+                    >
+                        <div className="w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                            <Video className="w-8 h-8" />
+                        </div>
+                        <div>
+                            <span className="text-sm font-black text-gray-900 block uppercase">Publicité Vidéo</span>
+                            <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Sora v2 Motion High-Fi</span>
+                        </div>
+                    </button>
+                </div>
+
+                <div className="mt-10 pt-8 border-t border-gray-100 text-center">
+                    <button onClick={onClose} className="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-gray-900 transition-colors">
+                        Annuler
+                    </button>
                 </div>
             </motion.div>
         </div>

@@ -12,14 +12,6 @@ export default function Chatbot() {
 
     const suggestions = [
         {
-            title: "YouTube to Shorts ⚡",
-            description: "Transformez n'importe quelle vidéo YouTube en Short TikTok viral en 1 clic avec 30 styles de sous-titres.",
-            buttonText: "Découvrir",
-            link: "/shorts",
-            icon: "🎬",
-            color: "from-blue-500 to-indigo-600"
-        },
-        {
             title: "Influenceurs IA 🌟",
             description: "Créez et gérez vos propres influenceurs IA pour générer des vidéos personnalisées",
             buttonText: "Créer",
