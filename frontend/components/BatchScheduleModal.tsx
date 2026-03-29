@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { batchScheduleVideos } from '@/services/videoService';
@@ -27,6 +28,12 @@ export default function BatchScheduleModal({
     const [selectedAccount, setSelectedAccount] = useState<string>('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+        return () => setMounted(false);
+    }, []);
 
     const updatePlatform = (key: string, field: string, value: any) => {
         setPlatforms(prev => ({
@@ -42,7 +49,6 @@ export default function BatchScheduleModal({
             return;
         }
 
-        // Validate dates
         for (const [key, p] of activePlatforms) {
             if (p.startDate <= new Date()) {
                 setError(`La date pour ${p.label} doit être dans le futur`);
@@ -50,7 +56,6 @@ export default function BatchScheduleModal({
             }
         }
 
-        // Validate TikTok account if TikTok is enabled
         if (platforms.tiktok.enabled && !selectedAccount) {
             setError('Veuillez sélectionner un compte TikTok');
             return;
@@ -65,7 +70,6 @@ export default function BatchScheduleModal({
         setError('');
 
         try {
-            // Prepare config payload
             const platformConfig = Object.entries(platforms).reduce((acc, [key, p]) => {
                 if (p.enabled) {
                     acc[key] = {
@@ -86,8 +90,10 @@ export default function BatchScheduleModal({
         }
     };
 
-    return (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[100] font-outfit p-4 overflow-hidden">
+    if (!mounted) return null;
+
+    return createPortal(
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[9999] font-outfit p-4 overflow-hidden">
             {/* Overlay */}
             <div className="absolute inset-0 z-0" onClick={onClose}></div>
 
@@ -246,7 +252,8 @@ export default function BatchScheduleModal({
                     animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
                 }
             `}</style>
-        </div>
+        </div>,
+        document.body
     );
 }
 

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useScheduledTasks } from '@/context/ScheduledTasksContext';
@@ -25,6 +26,7 @@ export default function ScheduleModal({
 }: ScheduleModalProps) {
     const { scheduleTask } = useScheduledTasks();
     const { showToast } = useToast();
+    const [mounted, setMounted] = useState(false);
     const [selectedDate, setSelectedDate] = useState<Date>(() => {
         const d = new Date();
         d.setMinutes(d.getMinutes() + 15);
@@ -38,6 +40,11 @@ export default function ScheduleModal({
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+
+    useEffect(() => {
+        setMounted(true);
+        return () => setMounted(false);
+    }, []);
 
     const togglePlatform = (p: keyof typeof platforms) => {
         setPlatforms(prev => ({ ...prev, [p]: !prev[p] }));
@@ -58,7 +65,6 @@ export default function ScheduleModal({
             return;
         }
 
-        // Basic ObjectId validation (24 hex chars)
         if (platforms.tiktok && (selectedAccount.length !== 24 || !/^[0-9a-fA-F]{24}$/.test(selectedAccount))) {
             setError("Identifiant de compte TikTok invalide");
             return;
@@ -73,7 +79,6 @@ export default function ScheduleModal({
         setError('');
 
         try {
-            // Schedule each selected platform individually
             for (const platform of selectedPlatforms) {
                 const response = await schedulePlatformVideo(
                     videoId,
@@ -86,7 +91,6 @@ export default function ScheduleModal({
                     throw new Error(response.message || `Erreur lors de la planification sur ${platform}`);
                 }
 
-                // Update local task context for desktop notifications/monitoring if used
                 scheduleTask({
                     videoId,
                     platforms: [platform],
@@ -95,7 +99,6 @@ export default function ScheduleModal({
                     videoTitle: video?.promptText
                 });
 
-                // Notify parent with the latest video state
                 onSchedule(response.video);
             }
 
@@ -108,8 +111,10 @@ export default function ScheduleModal({
         }
     };
 
-    return (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[200] font-outfit p-4 overflow-hidden">
+    if (!mounted) return null;
+
+    return createPortal(
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] font-outfit p-4 overflow-hidden">
             {/* Overlay */}
             <div className="absolute inset-0 z-0" onClick={onClose}></div>
 
@@ -244,7 +249,8 @@ export default function ScheduleModal({
                     animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
                 }
             `}</style>
-        </div>
+        </div>,
+        document.body
     );
 }
 
