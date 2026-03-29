@@ -27,7 +27,6 @@ export default function Sidebar() {
 
     const sidebarItems = [
         { href: '/shorts', label: t('common.nav.shorts'), icon: Video },
-        { href: '/stars', label: t('common.nav.stars'), icon: Star },
         { href: '/create-influencer', label: t('features.influencers.title'), icon: Users },
         { href: '/generate', label: t('common.nav.generate'), icon: Wand2 },
         { href: '/text-to-speech', label: t('common.nav.tts'), icon: Mic },

@@ -23,7 +23,7 @@ export default function Chatbot() {
             title: "Influenceurs IA 🌟",
             description: "Créez et gérez vos propres influenceurs IA pour générer des vidéos personnalisées",
             buttonText: "Créer",
-            link: "/stars",
+            link: "/create-influencer",
             icon: "🤖",
             isNew: true,
             color: "from-[#e2a9f1] to-[#c77ddf]"

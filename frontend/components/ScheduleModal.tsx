@@ -109,93 +109,112 @@ export default function ScheduleModal({
     };
 
     return (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-gray-900 border border-purple-500/30 rounded-2xl p-8 max-w-md w-full shadow-2xl">
-                <h2 className="text-2xl font-bold text-white mb-6">Planifier la publication</h2>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[200] font-outfit p-4 overflow-hidden">
+            {/* Overlay */}
+            <div className="absolute inset-0 z-0" onClick={onClose}></div>
 
-                {/* Platforms Selector */}
-                <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-300 mb-3">
+            <div className="relative z-10 bg-[#111827] border border-white/5 
+                rounded-[2.5rem] 
+                p-8 sm:p-10 
+                w-full max-w-[420px] 
+                shadow-2xl animate-scaleIn 
+                max-h-[90vh] 
+                overflow-y-auto
+            ">
+                <h2 className="text-2xl sm:text-3xl font-black text-white mb-8 tracking-tight">Planifier la publication</h2>
+
+                {/* Platforms Selector (Clean 3-Col Grid) */}
+                <div className="mb-8">
+                    <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-4 ml-1">
                         Plateformes
                     </label>
                     <div className="grid grid-cols-3 gap-3">
                         <button
                             onClick={() => togglePlatform('tiktok')}
-                            className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all ${platforms.tiktok ? 'bg-purple-500/20 border-purple-500 text-white' : 'bg-gray-800 border-gray-700 text-gray-400'}`}
+                            className={`flex flex-col items-center gap-3 p-4 rounded-3xl border-2 transition-all duration-300 ${platforms.tiktok ? 'bg-purple-500/10 border-purple-500 text-white shadow-lg shadow-purple-500/10' : 'bg-white/[0.03] border-white/5 text-gray-500 hover:border-white/10'}`}
                         >
-                            <TikTokIcon className="w-6 h-6" />
-                            <span className="text-[10px] font-bold">TikTok</span>
+                            <TikTokIcon className={`w-6 h-6 transition-transform ${platforms.tiktok ? 'scale-110' : ''}`} />
+                            <span className="text-[10px] font-bold uppercase tracking-widest">TikTok</span>
                         </button>
                         <button
                             onClick={() => togglePlatform('facebook')}
-                            className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all ${platforms.facebook ? 'bg-blue-500/20 border-blue-500 text-white' : 'bg-gray-800 border-gray-700 text-gray-400'}`}
+                            className={`flex flex-col items-center gap-3 p-4 rounded-3xl border-2 transition-all duration-300 ${platforms.facebook ? 'bg-blue-500/10 border-blue-500 text-white shadow-lg shadow-blue-500/10' : 'bg-white/[0.03] border-white/5 text-gray-500 hover:border-white/10'}`}
                         >
-                            <FacebookIcon className="w-6 h-6" />
-                            <span className="text-[10px] font-bold">Facebook</span>
+                            <FacebookIcon className={`w-6 h-6 transition-transform ${platforms.facebook ? 'scale-110' : ''}`} />
+                            <span className="text-[10px] font-bold uppercase tracking-widest">FB</span>
                         </button>
                         <button
                             onClick={() => togglePlatform('youtube')}
-                            className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all ${platforms.youtube ? 'bg-red-500/20 border-red-500 text-white' : 'bg-gray-800 border-gray-700 text-gray-400'}`}
+                            className={`flex flex-col items-center gap-3 p-4 rounded-3xl border-2 transition-all duration-300 ${platforms.youtube ? 'bg-red-500/10 border-red-500 text-white shadow-lg shadow-red-500/10' : 'bg-white/[0.03] border-white/5 text-gray-500 hover:border-white/10'}`}
                         >
-                            <YouTubeIcon className="w-6 h-6" />
-                            <span className="text-[10px] font-bold">YouTube</span>
+                            <YouTubeIcon className={`w-6 h-6 transition-transform ${platforms.youtube ? 'scale-110' : ''}`} />
+                            <span className="text-[10px] font-bold uppercase tracking-widest">YouTube</span>
                         </button>
                     </div>
                 </div>
 
                 {/* TikTok Account Selector */}
                 {platforms.tiktok && (
-                    <div className="mb-6">
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <div className="mb-8">
+                        <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-4 ml-1">
                             Compte TikTok
                         </label>
-                        <select
-                            value={selectedAccount}
-                            onChange={(e) => setSelectedAccount(e.target.value)}
-                            className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:outline-none focus:border-purple-500 transition-colors"
-                        >
-                            <option value="">Sélectionner un compte</option>
-                            {tiktokAccounts.map((account) => {
-                                const accId = account._id || (account as any).id;
-                                return (
-                                    <option key={accId} value={accId}>
-                                        @{account.tiktokUsername || 'tiktok'} ({account.accountName || 'Compte'})
-                                    </option>
-                                );
-                            })}
-                        </select>
+                        <div className="relative group">
+                            <select
+                                value={selectedAccount}
+                                onChange={(e) => setSelectedAccount(e.target.value)}
+                                className="w-full h-14 px-6 bg-[#1f2937]/50 border border-white/10 rounded-2xl text-white text-base font-bold focus:outline-none focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all appearance-none cursor-pointer"
+                            >
+                                <option value="">Sélectionner un compte</option>
+                                {tiktokAccounts.map((account) => {
+                                    const accId = account._id || (account as any).id;
+                                    return (
+                                        <option key={accId} value={accId}>
+                                            @{account.tiktokUsername || 'tiktok'} ({account.accountName || 'Compte'})
+                                        </option>
+                                    );
+                                })}
+                            </select>
+                            <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </div>
+                        </div>
                     </div>
                 )}
 
                 {/* Date & Time Picker */}
-                <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                <div className="mb-10">
+                    <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-4 ml-1">
                         Date et heure
                     </label>
-                    <DatePicker
-                        selected={selectedDate}
-                        onChange={(date: Date | null) => date && setSelectedDate(date)}
-                        showTimeSelect
-                        timeFormat="HH:mm"
-                        timeIntervals={15}
-                        dateFormat="dd/MM/yyyy HH:mm"
-                        minDate={new Date()}
-                        className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:outline-none focus:border-purple-500 transition-colors"
-                    />
+                    <div className="relative custom-datepicker">
+                        <DatePicker
+                            selected={selectedDate}
+                            onChange={(date: Date | null) => date && setSelectedDate(date)}
+                            showTimeSelect
+                            timeFormat="HH:mm"
+                            timeIntervals={15}
+                            dateFormat="dd/MM/yyyy HH:mm"
+                            minDate={new Date()}
+                            className="w-full h-14 px-6 bg-[#1f2937]/50 border border-white/10 rounded-2xl text-white text-base font-bold focus:outline-none focus:border-purple-500 transition-all"
+                        />
+                    </div>
                 </div>
 
                 {/* Error Message */}
                 {error && (
-                    <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm">
-                        {error}
+                    <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-[11px] font-bold flex items-center gap-3">
+                        <span className="text-base">⚠️</span> {error}
                     </div>
                 )}
 
-                {/* Actions */}
-                <div className="flex space-x-3">
+                {/* Actions (Side by Side) */}
+                <div className="grid grid-cols-2 gap-4">
                     <button
                         onClick={onClose}
-                        className="flex-1 px-4 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-xl transition-colors"
+                        className="w-full h-14 bg-white/[0.05] hover:bg-white/[0.08] text-gray-400 hover:text-white font-black rounded-2xl transition-all border border-white/5 text-[11px] uppercase tracking-widest"
                         disabled={loading}
                     >
                         Annuler
@@ -203,12 +222,29 @@ export default function ScheduleModal({
                     <button
                         onClick={handleSchedule}
                         disabled={loading}
-                        className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white rounded-xl font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full h-14 bg-gradient-to-r from-purple-600 to-pink-600 hover:scale-[1.02] active:scale-95 text-white font-black rounded-2xl transition-all shadow-xl shadow-purple-500/20 text-[11px] uppercase tracking-widest flex items-center justify-center gap-3"
                     >
-                        {loading ? 'Planification...' : 'Planifier'}
+                        {loading ? '...' : 'Planifier'}
                     </button>
                 </div>
             </div>
+
+            <style jsx global>{`
+                .react-datepicker-wrapper {
+                    width: 100%;
+                }
+                .react-datepicker__input-container input {
+                    width: 100%;
+                }
+                @keyframes scaleIn {
+                    from { transform: scale(0.95); opacity: 0; }
+                    to { transform: scale(1); opacity: 1; }
+                }
+                .animate-scaleIn {
+                    animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                }
+            `}</style>
         </div>
     );
 }
+

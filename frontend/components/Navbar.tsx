@@ -389,15 +389,15 @@ export default function Navbar() {
                         <div className="lg:hidden py-4 space-y-1 border-t border-gray-200 px-4">
                             {/* Stars */}
                             <Link
-                                href="/stars"
-                                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${isActive('/stars')
+                                href="/create-influencer"
+                                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${isActive('/create-influencer')
                                     ? 'bg-gradient-to-r from-[#e2a9f1]/10 to-[#c77ddf]/10 text-[#c77ddf] border border-[#e2a9f1]/20'
                                     : 'text-gray-600 hover:bg-gray-50'
                                     }`}
                                 onClick={() => setShowMobileMenu(false)}
                             >
-                                <Star className="w-4 h-4" />
-                                <span>{t('common.nav.stars')}</span>
+                                <Users className="w-4 h-4" />
+                                <span>{t('features.influencers.title')}</span>
                             </Link>
 
                             {/* Create Section */}

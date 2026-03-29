@@ -42,12 +42,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
             priority: 0.9,
         },
         {
-            url: `${baseUrl}/stars`,
-            lastModified,
-            changeFrequency: 'weekly',
-            priority: 0.8,
-        },
-        {
             url: `${baseUrl}/create-influencer`,
             lastModified,
             changeFrequency: 'weekly',
