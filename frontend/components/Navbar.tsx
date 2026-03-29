@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter, usePathname } from 'next/navigation';
-import { Menu, X, ChevronDown, LogOut, CreditCard, LayoutDashboard, Languages, User, TrendingUp, Video, Wand2, Mic, Users, Star, BarChart3, Music, Layers, Sparkles } from 'lucide-react';
+import { Menu, X, ChevronDown, LogOut, CreditCard, LayoutDashboard, Languages, User, TrendingUp, Video, Wand2, Mic, Users, Star, BarChart3, Music, Layers, Sparkles, Film } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { logout, getCurrentUser } from '@/services/authService';
 import { getCurrentSubscription } from '@/services/subscriptionService';
@@ -179,6 +179,18 @@ export default function Navbar() {
                             >
                                 <Users className="w-4 h-4" />
                                 {t('common.nav.stars')}
+                            </Link>
+
+                            {/* CTA IA Studio - Primary Action */}
+                            <Link href="/studio">
+                                <motion.div
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#1a1a2e] to-[#16213e] text-white rounded-xl shadow-[0_4px_15px_rgba(226,169,241,0.2)] hover:shadow-[0_4px_20px_rgba(199,125,223,0.3)] border border-[#e2a9f1]/20 transition-all duration-300 group"
+                                >
+                                    <Film className="w-4 h-4 text-[#e2a9f1] group-hover:animate-pulse" />
+                                    <span className="text-sm font-bold bg-gradient-to-r from-[#e2a9f1] to-[#c77ddf] bg-clip-text text-transparent">Studio IA</span>
+                                </motion.div>
                             </Link>
 
                             {/* Créer - Dropdown */}
@@ -398,6 +410,16 @@ export default function Navbar() {
                             >
                                 <Users className="w-4 h-4" />
                                 <span>{t('features.influencers.title')}</span>
+                            </Link>
+
+                            {/* Mobile CTA Studio IA */}
+                            <Link
+                                href="/studio"
+                                className="flex items-center gap-3 mt-2 px-4 py-3 rounded-xl text-sm font-bold bg-gradient-to-r from-[#1a1a2e] to-[#16213e] text-white border border-[#e2a9f1]/20 shadow-lg"
+                                onClick={() => setShowMobileMenu(false)}
+                            >
+                                <Film className="w-4 h-4 text-[#e2a9f1]" />
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#e2a9f1] to-[#c77ddf]">Créer une série IA</span>
                             </Link>
 
                             {/* Create Section */}

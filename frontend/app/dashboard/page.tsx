@@ -12,7 +12,7 @@ import { getImages, deleteImage } from '@/services/imageService';
 import { getPlatformStatus } from '@/services/platformService';
 import Skeleton, { VideoCardSkeleton } from '@/components/Skeleton';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Sparkles, CreditCard, Filter, LayoutGrid, Image as ImageIcon, Video as VideoIcon } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sparkles, CreditCard, Filter, LayoutGrid, Image as ImageIcon, Video as VideoIcon, Film } from 'lucide-react';
 import { useToast } from '@/context/ToastContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { YouTubeIcon, ShortsIcon, ScheduledIcon, PublishedIcon, MagicWandIcon, TikTokIcon } from '@/components/ModernIcons';
@@ -28,7 +28,7 @@ function DashboardContent() {
     const [photos, setPhotos] = useState<any[]>([]);
     const [tiktokAccounts, setTiktokAccounts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [assetType, setAssetType] = useState<'videos' | 'photos'>('videos');
+    const [assetType, setAssetType] = useState<'videos' | 'photos' | 'series'>('videos');
     const [filter, setFilter] = useState<'all' | 'youtube' | 'short'>('all');
     const [statusFilter, setStatusFilter] = useState<'all' | 'generated' | 'scheduled' | 'published'>('all');
     const [selectedVideoIds, setSelectedVideoIds] = useState<string[]>([]);
@@ -143,6 +143,7 @@ function DashboardContent() {
         total: videos.length + photos.length,
         videos: videos.length,
         photos: photos.length,
+        series: 0, // Mock for now
         scheduled: videos.filter(v => v.status === 'scheduled').length,
         published: videos.filter(v => v.status === 'published').length
     };
@@ -245,7 +246,7 @@ function DashboardContent() {
                             { value: stats.total, label: t('dashboard.stats.total'), icon: <LayoutGrid className="w-5 h-5" />, color: 'text-gray-400' },
                             { value: stats.videos, label: t('dashboard.stats.videos'), icon: <VideoIcon className="w-5 h-5" />, color: 'text-indigo-500' },
                             { value: stats.photos, label: t('dashboard.stats.photos'), icon: <ImageIcon className="w-5 h-5" />, color: 'text-blue-500' },
-                            { value: stats.scheduled, label: t('dashboard.stats.scheduled'), icon: <ScheduledIcon className="w-5 h-5" />, color: 'text-blue-500' },
+                            { value: stats.series, label: "Séries IA", icon: <Film className="w-5 h-5" />, color: 'text-[#e2a9f1]' },
                             { value: stats.published, label: t('dashboard.stats.published'), icon: <PublishedIcon className="w-5 h-5" />, color: 'text-emerald-500' }
                         ].map((stat) => (
                             <motion.div
@@ -286,6 +287,16 @@ function DashboardContent() {
                         >
                             <ImageIcon className="w-5 h-5" />
                             {t('dashboard.tabs.photos')}
+                        </button>
+                        <button
+                            onClick={() => setAssetType('series')}
+                            className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black transition-all ${assetType === 'series'
+                                ? 'bg-gradient-to-r from-[#1a1a2e] to-[#16213e] text-white shadow-xl scale-105 border border-[#e2a9f1]/20'
+                                : 'bg-white text-gray-400 hover:bg-gray-50 border border-gray-100'
+                                }`}
+                        >
+                            <Film className="w-5 h-5 text-[#e2a9f1]" />
+                            Séries IA
                         </button>
                     </div>
 
@@ -399,7 +410,7 @@ function DashboardContent() {
                         )}
 
                         <div className="ml-auto text-[10px] font-black uppercase tracking-widest text-gray-400">
-                            {filteredItems.length} {assetType === 'videos' ? t('dashboard.stats.videos').toLowerCase() : t('dashboard.stats.photos').toLowerCase()} • Page {currentPage}/{totalPages || 1}
+                            {filteredItems.length} {assetType === 'videos' ? t('dashboard.stats.videos').toLowerCase() : assetType === 'photos' ? t('dashboard.stats.photos').toLowerCase() : 'séries'} • Page {currentPage}/{totalPages || 1}
                         </div>
                     </motion.div>
 
@@ -408,7 +419,7 @@ function DashboardContent() {
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                             {[1, 2, 3, 4, 5, 6].map(i => <VideoCardSkeleton key={i} />)}
                         </div>
-                    ) : filteredItems.length === 0 ? (
+                    ) : filteredItems.length === 0 || assetType === 'series' ? (
                         /* Empty State */
                         <motion.div
                             initial={{ opacity: 0, scale: 0.92, y: 12 }}
@@ -417,24 +428,24 @@ function DashboardContent() {
                             className="text-center py-24 bg-white/50 backdrop-blur-md rounded-[3rem] border-2 border-dashed border-gray-100"
                         >
                             <div className="w-20 h-20 bg-gray-50 rounded-3xl flex items-center justify-center mx-auto mb-6">
-                                {assetType === 'videos' ? <MagicWandIcon className="w-10 h-10 text-gray-300" /> : <ImageIcon className="w-10 h-10 text-gray-300" />}
+                                {assetType === 'videos' ? <MagicWandIcon className="w-10 h-10 text-gray-300" /> : assetType === 'photos' ? <ImageIcon className="w-10 h-10 text-gray-300" /> : <Film className="w-10 h-10 text-[#e2a9f1] opacity-70" />}
                             </div>
                             <h3 className="text-xl font-black text-gray-900 mb-2 uppercase tracking-tight">
                                 {assetType === 'videos'
                                     ? (videos.length === 0 ? t('dashboard.empty.noVideos') : t('dashboard.empty.noResults'))
-                                    : (photos.length === 0 ? t('dashboard.empty.noPhotos') : t('dashboard.empty.noResults'))}
+                                    : assetType === 'photos' ? (photos.length === 0 ? t('dashboard.empty.noPhotos') : t('dashboard.empty.noResults')) : 'Aucune série IA'}
                             </h3>
                             <p className="text-gray-500 mb-8 max-w-sm mx-auto font-medium">
                                 {assetType === 'videos'
                                     ? (videos.length === 0 ? t('dashboard.empty.videosCta') : t('dashboard.empty.filterHint'))
-                                    : (photos.length === 0 ? t('dashboard.empty.photosCta') : t('dashboard.empty.filterHint'))}
+                                    : assetType === 'photos' ? (photos.length === 0 ? t('dashboard.empty.photosCta') : t('dashboard.empty.filterHint')) : 'Lancez votre propre mini-série ou saga avec MAVEED IA Studio.'}
                             </p>
-                            {(assetType === 'videos' ? videos.length === 0 : photos.length === 0) && (
+                            {(assetType === 'videos' ? videos.length === 0 : assetType === 'photos' ? photos.length === 0 : true) && (
                                 <button
-                                    onClick={() => router.push('/generate')}
-                                    className="px-8 py-4 bg-black text-white font-black rounded-2xl shadow-xl hover:bg-gray-900 transition-all uppercase tracking-widest text-sm active:scale-95"
+                                    onClick={() => router.push(assetType === 'series' ? '/studio' : '/generate')}
+                                    className={`px-8 py-4 ${assetType === 'series' ? 'bg-gradient-to-r from-[#e2a9f1] to-[#c77ddf] text-black shadow-[#e2a9f1]/30' : 'bg-black text-white hover:bg-gray-900'} font-black rounded-2xl shadow-xl transition-all uppercase tracking-widest text-sm active:scale-95`}
                                 >
-                                    {assetType === 'videos' ? t('dashboard.empty.generateVideo') : t('dashboard.empty.generatePhoto')}
+                                    {assetType === 'videos' ? t('dashboard.empty.generateVideo') : assetType === 'photos' ? t('dashboard.empty.generatePhoto') : 'Créer ma première série'}
                                 </button>
                             )}
                         </motion.div>
