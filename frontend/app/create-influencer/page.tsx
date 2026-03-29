@@ -18,6 +18,7 @@ import * as influencerService from '@/services/influencerService';
 import { useToast } from '@/context/ToastContext';
 import { useLanguage } from '@/context/LanguageContext';
 import PremiumLoading from '@/components/PremiumLoading';
+import VideoPreviewModal from '@/components/VideoPreviewModal';
 
 type Gender = 'man' | 'woman' | 'other';
 
@@ -883,114 +884,7 @@ export default function AIInfluencerPage() {
     );
 }
 
-const VideoPreviewModal = ({ video, onClose }: { video: any, onClose: () => void }) => {
-    const [isDownloadingVideo, setIsDownloadingVideo] = useState(false);
-    return (
-        <AnimatePresence>
-            {video && (
-                <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 md:p-8 bg-black/80 backdrop-blur-md" onClick={onClose}>
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                        className="bg-[#111] rounded-[2.5rem] overflow-hidden max-w-5xl w-full shadow-2xl relative border border-white/10 flex flex-col md:flex-row h-auto md:max-h-[85vh]"
-                        onClick={e => e.stopPropagation()}
-                    >
-                        <button
-                            onClick={onClose}
-                            className="absolute top-6 right-6 p-4 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all z-20 backdrop-blur-md group"
-                        >
-                            <X className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
-                        </button>
-
-                        {/* Video Player Side */}
-                        <div className="flex-[2] bg-black aspect-video md:aspect-auto flex items-center justify-center relative overflow-hidden">
-                            <video
-                                src={video.videoUrl}
-                                controls
-                                autoPlay
-                                className="w-full h-full object-contain"
-                            />
-                            {/* Glow effect behind video */}
-                            <div className="absolute inset-0 bg-blue-500/5 pointer-events-none" />
-                        </div>
-
-                        {/* Info / Metadata Side */}
-                        <div className="flex-1 p-8 md:p-10 flex flex-col justify-between border-l border-white/5 bg-gradient-to-br from-[#161616] to-[#0a0a0a]">
-                            <div>
-                                <div className="flex items-center gap-3 mb-8">
-                                    <div className="p-3 bg-blue-500/20 rounded-2xl">
-                                        <Video className="w-5 h-5 text-blue-400" />
-                                    </div>
-                                    <div>
-                                        <span className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] block">Sora v2 Engine</span>
-                                        <span className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">High-Fidelity Render</span>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-8">
-                                    <div>
-                                        <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.15em] mb-3 flex items-center gap-2">
-                                            <Sparkles className="w-3 h-3 text-orange-400" /> Prompt Créatif
-                                        </h3>
-                                        <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
-                                            <p className="text-sm text-gray-300 font-medium leading-relaxed italic">
-                                                "{video.promptText || 'Scène générée via le studio IA Influencer'}"
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-6">
-                                        <div className="space-y-1">
-                                            <h3 className="text-[8px] font-black text-gray-500 uppercase tracking-widest">État du Rendu</h3>
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                                                <span className="text-[10px] font-black text-emerald-500 uppercase tracking-wider">{video.status || 'COMPLETED'}</span>
-                                            </div>
-                                        </div>
-                                        <div className="space-y-1">
-                                            <h3 className="text-[8px] font-black text-gray-500 uppercase tracking-widest">Résolution</h3>
-                                            <span className="text-[10px] font-black text-gray-300 uppercase tracking-wider">4K Ultra HD</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-1">
-                                        <h3 className="text-[8px] font-black text-gray-500 uppercase tracking-widest">ID Unique</h3>
-                                        <span className="text-[8px] font-mono text-gray-600 break-all">{video.id}</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                                <div className="mt-12 flex flex-col sm:flex-row gap-4">
-                                    <button
-                                        onClick={async () => {
-                                            if (!video.videoUrl) return;
-                                            setIsDownloadingVideo(true);
-                                            const influencerName = video.promptText ? video.promptText.slice(0, 15) : 'video';
-                                            const filename = getMaveedFilename(influencerName, 'video', video.id || video._id);
-                                            await downloadResource(video.videoUrl, filename);
-                                            setIsDownloadingVideo(false);
-                                        }}
-                                        disabled={isDownloadingVideo}
-                                        className="flex-[2] py-5 bg-blue-600 text-white rounded-[1.25rem] font-black uppercase tracking-widest text-[10px] hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/20 active:scale-95 flex items-center justify-center gap-3"
-                                    >
-                                        {isDownloadingVideo ? <Loader2 className="w-4 h-4 animate-spin" /> : <DownloadCloud className="w-4 h-4" />}
-                                        Télécharger la vidéo
-                                    </button>
-                                    <button
-                                        onClick={onClose}
-                                        className="flex-1 py-5 bg-white/5 border border-white/10 text-white rounded-[1.25rem] font-black uppercase tracking-widest text-[10px] hover:bg-white/10 transition-all active:scale-95"
-                                    >
-                                        Fermer
-                                    </button>
-                                </div>
-                        </div>
-                    </motion.div>
-                </div>
-            )}
-        </AnimatePresence>
-    );
-};
+// VideoPreviewModal is now a shared component at @/components/VideoPreviewModal
 
 const AdvancedStudioModal = ({ isOpen, onClose, t, gender, setGender, skinTone, setSkinTone, eyeColor, setEyeColor, hairColor, setHairColor, hairStyle, setHairStyle, hairLength, setHairLength, age, setAge, name, setName, previewImage, isLoading, onGenerate, onSave, aesthetic, setAesthetic }: any) => {
     if (!isOpen) return null;

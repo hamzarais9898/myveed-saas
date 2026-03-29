@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { saveAs } from 'file-saver';
 import { getMaveedFilename } from '@/utils/downloadHelper';
 import ScheduleModal from './ScheduleModal';
+import VideoPreviewModal from './VideoPreviewModal';
 import { downloadVideo, cancelSchedule, getVideoStatus } from '@/services/videoService';
 import { publishFacebookVideo, publishYouTube, publishToTikTok, getTikTokStatus } from '@/services/publishService';
 import { Loader2, Download, Calendar, Trash2, Check, Share2, AlertCircle, Play, Sparkles } from 'lucide-react';
@@ -32,6 +33,7 @@ export default function VideoCard({ video, onDelete, onUpdate, tiktokAccounts, s
     const [uploadingPlatform, setUploadingPlatform] = useState<string | null>(null);
     const [downloading, setDownloading] = useState(false);
     const [showScheduleModal, setShowScheduleModal] = useState(false);
+    const [showPreviewModal, setShowPreviewModal] = useState(false);
     const [error, setError] = useState('');
     const [isPlaying, setIsPlaying] = useState(false);
     const [extending, setExtending] = useState(false);
@@ -326,10 +328,11 @@ export default function VideoCard({ video, onDelete, onUpdate, tiktokAccounts, s
                             return (
                                 <div
                                     key={s}
-                                    className={`h-full flex-1 rounded-full transition-all duration-700 ${isActive
-                                            ? 'bg-gradient-to-r from-purple-500 to-indigo-600 shadow-[0_0_8px_rgba(168,85,247,0.6)] scale-y-110'
+                                    className={`h-full flex-1 rounded-full transition-all duration-700 ${
+                                        isActive 
+                                            ? 'bg-gradient-to-r from-purple-500 to-indigo-600 shadow-[0_0_8px_rgba(168,85,247,0.6)] scale-y-110' 
                                             : 'bg-gray-200/60'
-                                        }`}
+                                    }`}
                                 />
                             );
                         })}
@@ -342,20 +345,33 @@ export default function VideoCard({ video, onDelete, onUpdate, tiktokAccounts, s
     return (
         <>
             <div className={`group relative bg-white rounded-2xl border transition-all duration-300 overflow-hidden flex flex-col h-full hover:shadow-xl hover:shadow-purple-500/5 hover:-translate-y-1 ${selected ? 'border-[#e2a9f1] ring-2 ring-[#e2a9f1]/50' : 'border-gray-100'}`}>
-                {/* Video Preview */}
-                <div className={`relative ${compact ? 'aspect-square' : 'aspect-[9/16]'} bg-gray-100 overflow-hidden`}>
+                {/* Video Thumbnail with Play Button — click opens modal */}
+                <div
+                    className={`relative ${compact ? 'aspect-square' : 'aspect-[9/16]'} bg-gray-900 overflow-hidden cursor-pointer`}
+                    onClick={() => {
+                        if (video.videoUrl) setShowPreviewModal(true);
+                    }}
+                >
+                    {/* Poster / thumbnail frame */}
                     <video
                         src={video.videoUrl}
-                        className="w-full h-full object-cover"
-                        controls
-                        playsInline
+                        className="w-full h-full object-cover pointer-events-none"
                         preload="metadata"
-                        onPlay={() => setIsPlaying(true)}
-                        onPause={() => setIsPlaying(false)}
+                        muted
+                        playsInline
                     />
 
+                    {/* Play button overlay */}
+                    {video.videoUrl && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/10 transition-colors duration-200">
+                            <div className="w-14 h-14 bg-white/90 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform duration-200">
+                                <Play className="w-6 h-6 text-gray-900 ml-1" fill="currentColor" />
+                            </div>
+                        </div>
+                    )}
+
                     {/* Top Overlay Badges */}
-                    <div className={`absolute top-0 left-0 right-0 p-3 flex justify-between items-start transition-opacity duration-300 ${isPlaying ? 'opacity-0 hover:opacity-100' : 'opacity-100'}`}>
+                    <div className="absolute top-0 left-0 right-0 p-3 flex justify-between items-start pointer-events-none">
                         <div className="flex flex-col gap-2">
                             {getStatusIndicator()}
                         </div>
@@ -366,7 +382,7 @@ export default function VideoCard({ video, onDelete, onUpdate, tiktokAccounts, s
                                     e.stopPropagation();
                                     onSelect(video.id || video._id);
                                 }}
-                                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md ${selected
+                                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md pointer-events-auto ${selected
                                     ? 'bg-[#e2a9f1] text-white ring-2 ring-white'
                                     : 'bg-white/30 text-white hover:bg-white hover:text-[#e2a9f1]'
                                     }`}
@@ -377,7 +393,7 @@ export default function VideoCard({ video, onDelete, onUpdate, tiktokAccounts, s
                     </div>
 
                     {/* Bottom Info Gradient */}
-                    <div className={`absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent pt-12 transition-opacity duration-300 ${isPlaying ? 'opacity-0 hover:opacity-100' : 'opacity-100'}`}>
+                    <div className="absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent pt-12 pointer-events-none">
                         <div className="text-white">
                             <h3 className="font-bold text-sm mb-1 line-clamp-2 leading-tight drop-shadow-md">
                                 {video.promptText || "Sans titre"}
@@ -544,6 +560,11 @@ export default function VideoCard({ video, onDelete, onUpdate, tiktokAccounts, s
                     onClose={() => setShowScheduleModal(false)}
                 />
             )}
+
+            <VideoPreviewModal
+                video={showPreviewModal ? video : null}
+                onClose={() => setShowPreviewModal(false)}
+            />
         </>
     );
 }
