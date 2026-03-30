@@ -114,7 +114,9 @@ function GenerateContent() {
     const scrollToResults = () => {
         // Small delay to ensure the UI has updated (e.g. loading state / results are rendering)
         requestAnimationFrame(() => {
-            topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            if (typeof window !== 'undefined' && window.innerWidth > 768) {
+                topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         });
     };
 
@@ -220,8 +222,8 @@ function GenerateContent() {
             setSelectedImageForVideo(generateInfluencerImageUrl);
             setGenerationMode('image');
             
-            const defaultPrompt = 'Create a new photorealistic image of this influencer in a new scene while preserving identity, face structure, realism, and natural skin details.';
-            setPromptText(prev => prev.trim() ? prev : defaultPrompt);
+            // We no longer set predefined text directly in the input field to improve UX
+            setPromptText(prev => prev.trim() ? prev : '');
             showToast(`${generateInfluencerName} importé avec succès`, 'success');
 
             // Clean up
@@ -280,8 +282,8 @@ function GenerateContent() {
                     try { setCameraConfig(JSON.parse(savedCameraConfig)); } catch (e) {}
                 }
 
-                const defaultPrompt = 'Animate this image smoothly with realistic motion and cinematic lighting.';
-                setPromptText(prev => prev.trim() ? prev : (savedPrompt || storedPromptText || defaultPrompt));
+                // We keep saved context but remove hardcoded default text to show a visual placeholder
+                setPromptText(prev => prev.trim() ? prev : (savedPrompt || storedPromptText || ''));
                 
                 showToast(sourceType === 'fused-image' ? 'Image fusionnée importée et contexte restauré' : 'Image importée', 'success');
             }
@@ -321,8 +323,24 @@ function GenerateContent() {
         }
     }, [searchParams, duration, showToast]); // Proper dependencies
 
+    const getEffectivePrompt = () => {
+        if (promptText.trim()) return promptText.trim();
+        if (generationMode === 'video' && selectedImageForVideo) {
+            return t('generation.animatePrompt') || 'Animate this image smoothly with realistic motion and cinematic lighting.';
+        }
+        if (generationMode === 'image' && selectedSourceType === 'influencer') {
+            return 'Create a new photorealistic image of this influencer in a new scene while preserving identity, face structure, realism, and natural skin details.';
+        }
+        return '';
+    };
+
+    const isGenerationDisabled = () => {
+        return loading || (!promptText.trim() && !(generationMode === 'video' && selectedImageForVideo) && !(generationMode === 'image' && selectedSourceType === 'influencer'));
+    };
+
     const handlePreview = async () => {
-        if (!promptText.trim() || loading) return;
+        const effectivePrompt = getEffectivePrompt();
+        if (!effectivePrompt || loading) return;
         setLoading(true);
         setError('');
         
@@ -365,9 +383,11 @@ function GenerateContent() {
         scrollToResults();
 
         try {
+            const effectivePrompt = getEffectivePrompt();
+
             if (generationMode === 'video') {
                 // Append style to prompt
-                const enhancedPrompt = `[Style: ${videoStyle}] ${promptText}`;
+                const enhancedPrompt = `[Style: ${videoStyle}] ${effectivePrompt}`;
 
                 // Resolve Output Config for service
                 const getOutputConfig = (fmt: 'youtube' | 'short' | 'both') => {
@@ -434,7 +454,7 @@ function GenerateContent() {
                 // Image Generation
                 const isInfluencerSource = selectedSourceType === 'influencer';
                 const response = await generateImage(
-                    promptText,
+                    effectivePrompt,
                     imageResolution,
                     'cinematic',
                     imageCount,
@@ -521,7 +541,7 @@ function GenerateContent() {
     const handleAnimateImage = (imageUrl: string) => {
         setSelectedImageForVideo(imageUrl);
         setGenerationMode('video');
-        setPromptText(t('generation.animatePrompt'));
+        setPromptText('');
         // Scroll to top
         scrollToResults();
     };
@@ -880,10 +900,12 @@ function GenerateContent() {
                                             onChange={(e) => setPromptText(e.target.value)}
                                             placeholder={
                                                 selectedImageForVideo && generationMode === 'video'
-                                                    ? 'Animer cette image de manière cinématographique...'
-                                                    : generationMode === 'video'
-                                                        ? t('generation.placeholderVideo')
-                                                        : t('generation.placeholderImage')
+                                                    ? (t('generation.animatePrompt') || 'Animer cette image de manière cinématographique...')
+                                                    : selectedSourceType === 'influencer' && generationMode === 'image'
+                                                        ? 'Ex: Influenceur marchant dans les rues de Tokyo...'
+                                                        : generationMode === 'video'
+                                                            ? t('generation.placeholderVideo')
+                                                            : t('generation.placeholderImage')
                                             }
                                             className={`w-full px-6 py-5 bg-gray-50 border ${isListening ? 'border-red-300 ring-2 ring-red-100' : 'border-gray-200'} rounded-3xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none text-lg leading-relaxed min-h-[160px]`}
                                             required
@@ -1343,7 +1365,7 @@ function GenerateContent() {
                                     <button
                                         type="button"
                                         onClick={() => generationMode === 'video' ? handlePreview() : handleFinalGenerate()}
-                                        disabled={loading || !promptText.trim()}
+                                        disabled={isGenerationDisabled()}
                                         className="flex-1 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-xl font-black rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-purple-200 hover:-translate-y-1"
                                     >
                                         {loading ? (
