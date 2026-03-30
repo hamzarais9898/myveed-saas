@@ -88,6 +88,11 @@ export const previewGenerateImage = async (config: any) => {
     return response.data;
 };
 
+export const checkPreviewStatus = async (jobId: string) => {
+    const response = await axios.get(`${API_URL}/influencers/preview-status/${jobId}`, { headers: getHeaders() });
+    return response.data;
+};
+
 export const getInfluencerLibrary = async (id: string, page = 1, limit = 20, type?: string) => {
     let url = `${API_URL}/influencers/${id}/library?page=${page}&limit=${limit}`;
     if (type) url += `&type=${type}`;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Navbar from '@/components/Navbar';
@@ -58,6 +58,13 @@ export default function AIInfluencerPage() {
     const [studioLoading, setStudioLoading] = useState(false);
     const [studioPreview, setStudioPreview] = useState<string | null>(null);
     const [aesthetic, setAesthetic] = useState<'photorealistic' | 'cartoon'>('photorealistic');
+    const activeJobIdRef = useRef<string | null>(null);
+
+    useEffect(() => {
+        return () => {
+            activeJobIdRef.current = null;
+        };
+    }, []);
 
     // Form State (Technical Facial Reconstruction)
     const [name, setName] = useState('');
@@ -287,12 +294,12 @@ export default function AIInfluencerPage() {
                 age,
                 avatarUrl: previewImage,
                 bodyType,
-                // Removed hair/skin/eyes details from request as they are implicit in the preset matrix
-                // but kept in config if needed for future features
                 config: {
                     aesthetic: 'photorealistic',
-                    // Store the preset filename as 'reference' in checks
-                    preset: previewImage.split('/').pop()
+                    preset: previewImage.split('/').pop(),
+                    epidermal: { tone: skinTone },
+                    ocular: { color: eyeColor },
+                    hair: { color: hairColor, style: hairStyle }
                 } as any
             });
 
@@ -788,7 +795,10 @@ export default function AIInfluencerPage() {
 
                 <AdvancedStudioModal
                     isOpen={showAdvancedStudio}
-                    onClose={() => setShowAdvancedStudio(false)}
+                    onClose={() => {
+                        activeJobIdRef.current = null; // Stoppe le polling
+                        setShowAdvancedStudio(false);
+                    }}
                     t={t}
                     gender={gender} setGender={setGender}
                     skinTone={skinTone} setSkinTone={setSkinTone}
@@ -800,26 +810,95 @@ export default function AIInfluencerPage() {
                     previewImage={studioPreview}
                     isLoading={studioLoading}
                     onGenerate={async () => {
-                        console.log(`📸 [STUDIO] Generating preview | aesthetic=${aesthetic} | gender=${gender} | age=${age}`);
+                        if (studioLoading) return; // Prevent multiple clicks
+                        
+                        // Nettoyage avant nouvelle génération
+                        activeJobIdRef.current = null;
+                        setStudioPreview(null);
                         setStudioLoading(true);
+
+                        console.log(`📸 [STUDIO] Generating preview | aesthetic=${aesthetic} | gender=${gender} | age=${age}`);
+                        
                         try {
                             const res = await influencerService.previewGenerateImage({
                                 gender, 
-                                hair: { color: hairColor, style: hairStyle, length: hairLength } as any, 
-                                skin: { tone: skinTone }, 
-                                eyes: { color: eyeColor }, 
                                 age,
-                                aesthetic 
+                                config: {
+                                    aesthetic,
+                                    epidermal: { tone: skinTone },
+                                    ocular: { color: eyeColor },
+                                    hair: { color: hairColor, style: hairStyle, length: hairLength }
+                                }
                             });
-                            if (res.success) {
-                                console.log(`✅ [STUDIO] Preview generated successfully`);
+                            
+                            if (res.jobId) {
+                                activeJobIdRef.current = res.jobId;
+                                let attempts = 0;
+                                const maxAttempts = 40; // 40 * 2.5s = 100s
+                                
+                                const pollNext = async () => {
+                                    // Stop if modal closed, unmounted, or new job started
+                                    if (!activeJobIdRef.current || activeJobIdRef.current !== res.jobId) return;
+
+                                    attempts++;
+
+                                    if (attempts === 10) { // 10 * 2.5s = 25s
+                                        if (activeJobIdRef.current === res.jobId) {
+                                            showToast('La génération IA prend plus de temps que prévu...', 'info');
+                                        }
+                                    }
+
+                                    try {
+                                        const statusObj = await influencerService.checkPreviewStatus(res.jobId);
+                                        
+                                        // Re-check after async call to prevent parasitic setState
+                                        if (!activeJobIdRef.current || activeJobIdRef.current !== res.jobId) return;
+
+                                        if (statusObj.status === 'completed') {
+                                            console.log(`✅ [STUDIO] Preview generated successfully`);
+                                            setStudioPreview(statusObj.imageUrl);
+                                            setStudioLoading(false);
+                                            activeJobIdRef.current = null;
+                                        } else if (statusObj.status === 'failed') {
+                                            console.error(`❌ [STUDIO] Preview failed:`, statusObj.error);
+                                            showToast('Erreur: ' + (statusObj.error || 'Échec de génération'), 'error');
+                                            setStudioLoading(false);
+                                            activeJobIdRef.current = null;
+                                        } else if (attempts >= maxAttempts) {
+                                            console.warn(`⏳ [STUDIO] Preview polling timeout`);
+                                            showToast('Délai d\'attente dépassé. Veuillez réessayer.', 'warning');
+                                            setStudioLoading(false);
+                                            activeJobIdRef.current = null;
+                                        } else {
+                                            setTimeout(pollNext, 2500);
+                                        }
+                                    } catch (err) {
+                                        if (attempts >= maxAttempts) {
+                                            if (activeJobIdRef.current === res.jobId) {
+                                                console.error('❌ [STUDIO] Polling network error final');
+                                                showToast('Erreur réseau lors de la vérification', 'error');
+                                                setStudioLoading(false);
+                                                activeJobIdRef.current = null;
+                                            }
+                                        } else {
+                                            setTimeout(pollNext, 2500);
+                                        }
+                                    }
+                                };
+                                
+                                setTimeout(pollNext, 2500);
+                            } else if (res.success && res.imageUrl) {
+                                console.log(`✅ [STUDIO] Preview generated successfully (Sync)`);
                                 setStudioPreview(res.imageUrl);
+                                setStudioLoading(false);
+                            } else {
+                                setStudioLoading(false);
                             }
                         } catch (e) { 
-                            console.error(`❌ [STUDIO] Preview failed`, e);
-                            showToast('Erreur génération', 'error'); 
+                            console.error(`❌ [STUDIO] Preview initialization failed`, e);
+                            showToast('Erreur d\'initialisation de la génération', 'error'); 
+                            setStudioLoading(false);
                         }
-                        finally { setStudioLoading(false); }
                     }}
                     onSave={async (status: string) => {
                         if (!studioPreview) return;
@@ -830,11 +909,13 @@ export default function AIInfluencerPage() {
                                 gender, 
                                 age, 
                                 avatarUrl: studioPreview, 
-                                skin: { tone: skinTone }, 
-                                eyes: { color: eyeColor }, 
-                                hair: { color: hairColor, style: hairStyle, length: hairLength } as any,                                
                                 status: status as any,
-                                config: { aesthetic } as any
+                                config: {
+                                    aesthetic,
+                                    epidermal: { tone: skinTone },
+                                    ocular: { color: eyeColor },
+                                    hair: { color: hairColor, style: hairStyle, length: hairLength }
+                                } as any
                             });
                             if (res.success) {
                                 showToast(status === 'draft' ? 'Enregistré en brouillon' : 'Influenceur créé !', 'success');
