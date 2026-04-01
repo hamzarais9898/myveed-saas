@@ -3,8 +3,9 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Film, Clapperboard, Sparkles, Wand2, ChevronRight, Settings2, ShieldAlert } from 'lucide-react';
-import { MOCK_GENRES, MOCK_TONES, MOCK_FORMATS, MOCK_SEASON } from '@/lib/studio-mock-data';
+import { Film, Clapperboard, Sparkles, Wand2, ChevronRight, Settings2, ShieldAlert, AlertCircle } from 'lucide-react';
+import { MOCK_GENRES, MOCK_TONES, MOCK_FORMATS } from '@/lib/studio-mock-data';
+import { createStudioSeason } from '@/services/studioService';
 import { useLanguage } from '@/context/LanguageContext';
 
 export default function StudioSeriesCreation() {
@@ -17,15 +18,28 @@ export default function StudioSeriesCreation() {
     const [selectedTone, setSelectedTone] = useState('Sombre');
     const [selectedFormat, setSelectedFormat] = useState('9:16');
     const [advancedOpen, setAdvancedOpen] = useState(false);
+    const [episodeCount, setEpisodeCount] = useState(5);
+    const [actionIntensity, setActionIntensity] = useState(7);
+    const [error, setError] = useState('');
     
     const [isGenerating, setIsGenerating] = useState(false);
 
-    const handleGenerate = () => {
+    const handleGenerate = async () => {
+        setError('');
         setIsGenerating(true);
-        // Simulate API call for generating season outline
-        setTimeout(() => {
-            router.push(`/studio/season/${MOCK_SEASON.id}`);
-        }, 1500);
+        try {
+            const data = await createStudioSeason(idea, selectedGenre, selectedTone, selectedFormat, episodeCount, actionIntensity);
+            if (data.success && data.season) {
+                router.push(`/studio/season/${data.season.seasonId}`);
+            } else {
+                setError('Erreur inattendue du backend.');
+                setIsGenerating(false);
+            }
+        } catch (err: any) {
+            console.error(err);
+            setError(err.message || 'Erreur lors de la génération.');
+            setIsGenerating(false);
+        }
     };
 
     return (
@@ -45,6 +59,15 @@ export default function StudioSeriesCreation() {
                 <p className="text-gray-400 text-lg max-w-2xl mx-auto">
                     Concevez votre univers narratif. L'IA de MAVEED va structurer la saison, développer les personnages et générer les épisodes.
                 </p>
+                <div className="mt-8 flex justify-center">
+                    <button 
+                        onClick={() => router.push('/studio/library')} 
+                        className="px-6 py-2.5 rounded-xl border border-gray-800 bg-[#151521] hover:bg-[#1a1a27] hover:border-[#e2a9f1]/30 text-gray-300 hover:text-white font-bold transition-all text-sm flex items-center gap-2 shadow-sm"
+                    >
+                        <Film className="w-4 h-4" />
+                        Mes saisons
+                    </button>
+                </div>
             </motion.div>
 
             <motion.div 
@@ -170,20 +193,18 @@ export default function StudioSeriesCreation() {
                         <div className="p-6 sm:p-8 pt-0 border-t border-gray-800/50">
                             <div className="grid sm:grid-cols-2 gap-8 mt-6">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-400 mb-2">Nombre d'épisodes (Saison 1)</label>
-                                    <input type="range" min="3" max="10" defaultValue="5" className="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-[#e2a9f1]" />
+                                    <label className="block text-sm font-medium text-gray-400 mb-2">Nombre d'épisodes (Saison 1) : <span className="text-[#e2a9f1]">{episodeCount}</span></label>
+                                    <input type="range" min="3" max="10" value={episodeCount} onChange={(e) => setEpisodeCount(Number(e.target.value))} className="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-[#e2a9f1]" />
                                     <div className="flex justify-between text-xs text-gray-500 mt-2">
                                         <span>3 éps</span>
-                                        <span className="text-[#e2a9f1] font-bold">5 éps</span>
                                         <span>10 éps</span>
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-400 mb-2">Intensité de l'Action</label>
-                                    <input type="range" min="1" max="10" defaultValue="7" className="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-[#e2a9f1]" />
+                                    <label className="block text-sm font-medium text-gray-400 mb-2">Intensité de l'Action : <span className="text-[#e2a9f1]">{actionIntensity}/10</span></label>
+                                    <input type="range" min="1" max="10" value={actionIntensity} onChange={(e) => setActionIntensity(Number(e.target.value))} className="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-[#e2a9f1]" />
                                     <div className="flex justify-between text-xs text-gray-500 mt-2">
                                         <span>Dialogues</span>
-                                        <span>Équilibré</span>
                                         <span>Action pure</span>
                                     </div>
                                 </div>
@@ -194,6 +215,14 @@ export default function StudioSeriesCreation() {
 
                 {/* Submit Block */}
                 <div className="pt-8 flex flex-col items-center">
+                    
+                    {error && (
+                        <div className="w-full max-w-md mb-6 p-4 bg-red-900/20 border border-red-500/50 rounded-2xl flex items-center justify-center gap-3 animate-in fade-in slide-in-from-bottom-2">
+                            <AlertCircle className="text-red-500 w-5 h-5 flex-shrink-0" />
+                            <p className="text-red-400 text-sm font-medium">{error}</p>
+                        </div>
+                    )}
+
                     <button 
                         onClick={handleGenerate}
                         disabled={isGenerating || !idea.trim()}
