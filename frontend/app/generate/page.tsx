@@ -8,7 +8,7 @@ import FormatSelector from '@/components/FormatSelector';
 import Footer from '@/components/Footer';
 import BatchProgress from '@/components/BatchProgress';
 import { generateVideo, getAvailableProviders, getVideoStatus } from '@/services/videoService';
-import { generateImage } from '@/services/imageService';
+import { generateImage, checkImageStatus } from '@/services/imageService';
 import PremiumLoading from '@/components/PremiumLoading';
 import { Download, Image as ImageIcon, Video as VideoIcon, Sparkles, X, Layers } from 'lucide-react';
 import ImagePicker from '@/components/generation/ImagePicker';
@@ -465,12 +465,36 @@ function GenerateContent() {
                     isInfluencerSource
                 );
 
-                if (response.images) {
+                console.log(`[IMAGE GEN] Response received:`, response);
+
+                if (response.processing && response.imageIds) {
+                    // ASYNC MODE (Heroku Anti-Timeout)
+                    const placeholderImages = response.imageIds.map((id: string) => ({
+                        id,
+                        _id: id,
+                        status: 'processing',
+                        promptText: effectivePrompt,
+                        resolution: imageResolution,
+                        createdAt: new Date().toISOString()
+                    }));
+                    
+                    setGeneratedImages(placeholderImages);
+                    setLoading(false); // We stop the main full-screen loader
+                    
+                    // Start polling for the first one (or all if we want to track individually)
+                    // For UI simplicity, we poll the first one to drive the main progress bar
+                    if (response.imageIds.length > 0) {
+                        startImagePolling(response.imageIds[0], pollingCancelRef.current);
+                    }
+                } else if (response.images) {
+                    // DIRECT MODE
                     setGeneratedImages(response.images);
+                    setLoading(false);
                 } else if (response.image) {
+                    // DIRECT MODE (Single)
                     setGeneratedImages([response.image]);
+                    setLoading(false);
                 }
-                setLoading(false);
             }
         } catch (err: any) {
             console.error('GENERATE ERROR:', err);
@@ -526,6 +550,67 @@ function GenerateContent() {
                 console.error('Polling error:', err);
                 setPollingActive(false);
                 setLoading(false);
+            }
+        };
+
+        poll();
+    };
+
+    const startImagePolling = async (imageId: string, cancelRef: { cancelled: boolean }) => {
+        setPollingActive(true);
+        setGenerationStatus('processing');
+        setError('');
+
+        const poll = async () => {
+            if (cancelRef.cancelled) return;
+            try {
+                const data = await checkImageStatus(imageId);
+                if (cancelRef.cancelled) return;
+                
+                const status = (data.status || '').toLowerCase();
+                const progress = data.progress || 0;
+
+                setGenerationStatus(status);
+                setGenerationProgress(progress);
+
+                if (status === 'completed' || status === 'generated' || status === 'success') {
+                    setPollingActive(false);
+                    setLoading(false);
+                    
+                    // Update the specific image in the results list
+                    setGeneratedImages(prev => prev.map(img => 
+                        (img.id === imageId || img._id === imageId) 
+                        ? { ...img, ...data, status: 'generated' } 
+                        : img
+                    ));
+                    
+                    showToast(t('generation.imageSuccess') || 'Image générée avec succès !', 'success');
+                    return;
+                }
+
+                if (status === 'failed' || status === 'error') {
+                    setPollingActive(false);
+                    setLoading(false);
+                    const msg = data.errorMessage || 'La génération a échoué';
+                    setError(msg);
+                    showToast(msg, 'error');
+                    
+                    // Update status to failed in the list
+                    setGeneratedImages(prev => prev.map(img => 
+                        (img.id === imageId || img._id === imageId) 
+                        ? { ...img, status: 'failed', errorMessage: msg } 
+                        : img
+                    ));
+                    return;
+                }
+
+                // Poll again after 3 seconds for images (usually faster than video)
+                setTimeout(poll, 3000);
+            } catch (err) {
+                if (cancelRef.cancelled) return;
+                console.error('Image polling error:', err);
+                // Don't stop on single error, retry once more
+                setTimeout(poll, 5000);
             }
         };
 

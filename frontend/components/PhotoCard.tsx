@@ -19,40 +19,41 @@ export default function PhotoCard({ photo, onDelete, compact = false }: PhotoCar
     const { t } = useLanguage();
     const [downloading, setDownloading] = useState(false);
 
+    const isProcessing = photo.status === 'processing' || photo.status === 'pending';
+    const isFailed = photo.status === 'failed';
+    const isReady = photo.status === 'generated' || photo.status === 'completed' || (!photo.status && photo.imageUrl);
+
     const handleDownload = async (e: React.MouseEvent) => {
         e.stopPropagation();
-        if (downloading) return;
+        if (downloading || !isReady) return;
         
         setDownloading(true);
         try {
             const imageId = photo.id || photo._id;
-            // 1. Get verified download info from backend (mirroring VideoCard pattern)
             const downloadData = await downloadImage(imageId);
             
             if (downloadData.success && downloadData.downloadUrl) {
                 const influencerName = photo.influencerName || 'photo';
                 const filename = getMaveedFilename(influencerName, 'photo', imageId);
-                // 2. Trigger the robust download via our enhanced helper (includes fl_attachment injection)
                 await downloadResource(downloadData.downloadUrl, filename);
             } else {
                 throw new Error('Could not get download link');
             }
         } catch (err) {
             console.error('Download error:', err);
-            // Fallback to direct URL if backend fails for any reason
             const influencerName = photo.influencerName || 'photo';
             const filename = getMaveedFilename(influencerName, 'photo', photo.id || photo._id);
-            await downloadResource(photo.imageUrl, filename);
+            if (photo.imageUrl) await downloadResource(photo.imageUrl, filename);
         } finally {
             setDownloading(false);
         }
     };
 
     const handleAnimate = () => {
+        if (!isReady) return;
         const imageUrl = photo.imageUrl || photo.url || photo.image || '';
         if (!imageUrl) return;
 
-        // Enhanced logic: if it belongs to an influencer, lock the identity
         if (photo.influencerId || photo.sourceType === 'influencer') {
             sessionStorage.setItem('animateSourceType', 'influencer');
             sessionStorage.setItem('animateInfluencerId', photo.influencerId || photo.id);
@@ -60,21 +61,46 @@ export default function PhotoCard({ photo, onDelete, compact = false }: PhotoCar
             sessionStorage.setItem('animateInfluencerImageUrl', imageUrl);
             router.push('/generate?mode=image-to-video&source=influencer');
         } else {
-            // Standard image-to-video
             sessionStorage.setItem('animateImageUrl', imageUrl);
             router.push('/generate?mode=image-to-video');
         }
     };
 
     return (
-        <div className={`group relative bg-white rounded-2xl border transition-all duration-300 overflow-hidden flex flex-col h-full hover:shadow-xl hover:shadow-blue-500/5 hover:-translate-y-1 border-gray-100`}>
+        <div className={`group relative bg-white rounded-2xl border transition-all duration-300 overflow-hidden flex flex-col h-full hover:shadow-xl hover:shadow-blue-500/5 hover:-translate-y-1 ${isFailed ? 'border-red-200' : 'border-gray-100'}`}>
             {/* Image Preview */}
             <div className={`relative ${compact ? 'aspect-square' : 'aspect-square'} bg-gray-100 overflow-hidden`}>
-                <img
-                    src={photo.imageUrl}
-                    alt={photo.promptText}
-                    className="w-full h-full object-cover"
-                />
+                {photo.imageUrl ? (
+                    <img
+                        src={photo.imageUrl}
+                        alt={photo.promptText}
+                        className={`w-full h-full object-cover transition-opacity duration-500 ${isProcessing ? 'opacity-30' : 'opacity-100'}`}
+                    />
+                ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-6 text-center">
+                        <p className="text-[10px] text-gray-400 font-medium line-clamp-3">{photo.promptText}</p>
+                    </div>
+                )}
+
+                {/* Processing Overlay */}
+                {isProcessing && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/40 backdrop-blur-[2px]">
+                        <Loader2 className="w-8 h-8 text-[#e2a9f1] animate-spin mb-2" />
+                        <span className="text-[10px] font-black text-gray-900 uppercase tracking-widest bg-white/80 px-2 py-1 rounded-lg">
+                            {t('common.processing') || 'Génération...'}
+                        </span>
+                    </div>
+                )}
+
+                {/* Failed State */}
+                {isFailed && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-red-50/60 backdrop-blur-[2px]">
+                        <TrashIcon className="w-8 h-8 text-red-400 mb-2" />
+                        <span className="text-[10px] font-black text-red-600 uppercase tracking-widest bg-white/80 px-2 py-1 rounded-lg">
+                            {t('common.failed') || 'Échec'}
+                        </span>
+                    </div>
+                )}
 
                 {/* Top Overlay Badges */}
                 <div className="absolute top-0 left-0 right-0 p-3 flex justify-between items-start">
@@ -104,8 +130,9 @@ export default function PhotoCard({ photo, onDelete, compact = false }: PhotoCar
                     {/* Download */}
                     <button
                         onClick={handleDownload}
-                        className="flex flex-col items-center justify-center gap-1 p-2 rounded-xl text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-all active:scale-95"
-                        title="Télécharger"
+                        disabled={!isReady}
+                        className={`flex flex-col items-center justify-center gap-1 p-2 rounded-xl transition-all active:scale-95 ${!isReady ? 'opacity-30 cursor-not-allowed text-gray-300' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}
+                        title={isReady ? "Télécharger" : "Indisponible pendant la génération"}
                     >
                         {downloading ? (
                             <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
@@ -118,8 +145,9 @@ export default function PhotoCard({ photo, onDelete, compact = false }: PhotoCar
                     {/* Animate */}
                     <button
                         onClick={handleAnimate}
-                        className="flex flex-col items-center justify-center gap-1 p-2 rounded-xl text-blue-500 hover:text-blue-700 hover:bg-blue-50 transition-all active:scale-95"
-                        title="Animer cette photo"
+                        disabled={!isReady}
+                        className={`flex flex-col items-center justify-center gap-1 p-2 rounded-xl transition-all active:scale-95 ${!isReady ? 'opacity-30 cursor-not-allowed text-gray-300' : 'text-blue-500 hover:text-blue-700 hover:bg-blue-50'}`}
+                        title={isReady ? "Animer cette photo" : "Indisponible pendant la génération"}
                     >
                         <Wand2 className="w-5 h-5" />
                         <span className="text-[8px] font-black uppercase tracking-tighter">{t('photoCard.animate')}</span>
