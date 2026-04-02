@@ -21,14 +21,18 @@ import {
     Zap,
     Cpu,
     CheckCircle2,
-    Clock
+    Clock,
+    Loader2,
+    Download,
+    Check
 } from 'lucide-react';
 import { 
     getStudioScene, 
     generateStudioShots, 
     generateShotVideo,
     generateStudioSegments,
-    generateSegmentVideo
+    generateSegmentVideo,
+    compileSceneVideo
 } from '@/services/studioService';
 
 export default function StudioShotsStoryboard({ params }: { params: { id: string } }) {
@@ -42,6 +46,8 @@ export default function StudioShotsStoryboard({ params }: { params: { id: string
     const [loading, setLoading] = useState(true);
     const [isGeneratingShots, setIsGeneratingShots] = useState(false);
     const [isGeneratingSegments, setIsGeneratingSegments] = useState(false);
+    const [isCompiling, setIsCompiling] = useState(false);
+    const [pollingRetryCount, setPollingRetryCount] = useState(0);
     const [error, setError] = useState('');
 
     const fetchData = async (showLoading = true) => {
@@ -57,10 +63,40 @@ export default function StudioShotsStoryboard({ params }: { params: { id: string
                 if (data.scene.status === 'shots_generated') {
                     setIsGeneratingShots(false);
                 }
+
+                // Arrêter le spinner si les segments sont arrivés
+                if (data.segments && data.segments.length > 0) {
+                    setIsGeneratingSegments(false);
+                    setPollingRetryCount(0);
+                }
+
+                // Arrêter si prêt ou échec via segmentGenerationStatus
+                if (data.scene.segmentGenerationStatus === 'ready') {
+                    setIsGeneratingSegments(false);
+                    setPollingRetryCount(0);
+                }
+
+                if (data.scene.segmentGenerationStatus === 'failed') {
+                    setIsGeneratingSegments(false);
+                    setError("L'optimisation Sora a échoué côté serveur.");
+                }
+
+                // Handling Compilation Progress
+                if (data.scene.compilationStatus === 'compiling') {
+                    setIsCompiling(true);
+                } else if (data.scene.compilationStatus === 'completed') {
+                    setIsCompiling(false);
+                } else if (data.scene.compilationStatus === 'failed') {
+                    setIsCompiling(false);
+                    setError(`Compilation échec: ${data.scene.compilationError || 'Erreur inconnue'}`);
+                }
             }
         } catch (err: any) {
             console.error(err);
             setError(err.message || "Erreur de chargement de la scène");
+            // Stop spinners on error
+            setIsGeneratingShots(false);
+            setIsGeneratingSegments(false);
         } finally {
             setLoading(false);
         }
@@ -76,11 +112,23 @@ export default function StudioShotsStoryboard({ params }: { params: { id: string
         const hasGeneratingShots = shots.some(s => s.generationStatus === 'generating');
         const hasGeneratingSegments = segments.some(s => s.generationStatus === 'generating');
 
-        if (isGeneratingShots || isGeneratingSegments || hasGeneratingShots || hasGeneratingSegments) {
-            interval = setInterval(() => fetchData(false), 3000);
+        if (isGeneratingShots || isGeneratingSegments || isCompiling || hasGeneratingShots || hasGeneratingSegments) {
+            interval = setInterval(() => {
+                if (isGeneratingSegments) {
+                    setPollingRetryCount(prev => {
+                        if (prev > 30) { // Environ 1min30 (3s * 30)
+                            setIsGeneratingSegments(false);
+                            setError("Délai d'optimisation dépassé. Vérifiez vos segments plus tard.");
+                            return 0;
+                        }
+                        return prev + 1;
+                    });
+                }
+                fetchData(false);
+            }, 3000);
         }
         return () => { if (interval) clearInterval(interval); };
-    }, [isGeneratingShots, isGeneratingSegments, shots, segments]);
+    }, [isGeneratingShots, isGeneratingSegments, isCompiling, shots, segments]);
 
     const handleGenerateStoryboard = async () => {
         setIsGeneratingShots(true);
@@ -118,8 +166,16 @@ export default function StudioShotsStoryboard({ params }: { params: { id: string
     };
 
     const handleGenerateSegmentVideo = async (segmentId: string) => {
+        const seg = segments.find(s => s.segmentId === segmentId);
+        
+        // Si terminé, on télécharge
+        if (seg?.generationStatus === 'completed' && (seg as any).videoUrl) {
+            window.open((seg as any).videoUrl, '_blank');
+            return;
+        }
+
         setSegments(current => current.map(s => {
-            if (s.segmentId === segmentId) return { ...s, generationStatus: 'generating' };
+            if (s.segmentId === segmentId) return { ...s, generationStatus: 'generating', progress: 0 };
             return s;
         }));
         try {
@@ -127,6 +183,24 @@ export default function StudioShotsStoryboard({ params }: { params: { id: string
             setTimeout(() => fetchData(false), 1000);
         } catch (err: any) {
             setError(`Erreur Production: ${err.message}`);
+            // Reset status for retry
+            setSegments(current => current.map(s => {
+                if (s.segmentId === segmentId) return { ...s, generationStatus: 'failed' };
+                return s;
+            }));
+        }
+    };
+
+    const handleCompileScene = async () => {
+        setIsCompiling(true);
+        setError('');
+        try {
+            await compileSceneVideo(params.id);
+            // Launch immediate fetch to update status and activate polling
+            fetchData(false);
+        } catch (err: any) {
+            setError(`Échec Compilation: ${err.message}`);
+            setIsCompiling(false);
         }
     };
 
@@ -263,10 +337,116 @@ export default function StudioShotsStoryboard({ params }: { params: { id: string
                                 </m.div>
                             ))}
                         </div>
-                    ) : !isGeneratingShots && (
+                    ) : (
                         <div className="bg-gray-900/20 border border-dashed border-gray-800 rounded-[2rem] p-12 text-center">
                             <Camera className="w-8 h-8 text-gray-700 mx-auto mb-4" />
                             <p className="text-gray-500 text-sm font-bold uppercase tracking-widest">Aucun storyboard généré</p>
+                        </div>
+                    )}
+
+                    {/* Final Production Section */}
+                    {(segments.length > 0 || scene?.finalVideoUrl) && (
+                        <div className="mt-20 space-y-10">
+                            <div className="flex items-center justify-between border-t border-gray-800 pt-12">
+                                <div>
+                                    <h2 className="text-2xl font-black text-white uppercase tracking-widest flex items-center gap-3">
+                                        <Film className="w-6 h-6 text-[#e2a9f1]" /> Production Finale
+                                        {scene?.compilationStatus === 'completed' && (
+                                            <span className="bg-green-500/10 border border-green-500/20 text-green-500 text-[10px] font-black px-3 py-1 rounded-full ml-4 tracking-[0.1em]">PRÊT</span>
+                                        )}
+                                    </h2>
+                                    <p className="text-gray-500 text-sm mt-2 font-medium">Assemblez tous les segments Sora en une seule vidéo finale orchestrée.</p>
+                                </div>
+                                
+                                <button 
+                                    onClick={handleCompileScene}
+                                    disabled={isCompiling || segments.some(s => s.generationStatus !== 'completed')}
+                                    className={`px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-[0.2em] transition-all shadow-2xl flex items-center gap-3 ${
+                                        isCompiling 
+                                            ? 'bg-gray-800 text-gray-500 cursor-not-allowed' 
+                                            : segments.some(s => s.generationStatus !== 'completed')
+                                                ? 'bg-gray-900/50 text-gray-700 border border-gray-800 cursor-not-allowed'
+                                                : 'bg-gradient-to-r from-[#e2a9f1] to-[#ff80b5] text-black hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(226,169,241,0.3)]'
+                                    }`}
+                                >
+                                    {isCompiling ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                            Compilation en cours...
+                                        </>
+                                    ) : scene?.compilationStatus === 'completed' ? (
+                                        <>
+                                            <RefreshCw className="w-4 h-4" />
+                                            Re-compiler la scène
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Wand2 className="w-4 h-4" />
+                                            Compiler la scène finale
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+
+                            {scene?.finalVideoUrl ? (
+                                <m.div 
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="relative aspect-video rounded-[3rem] overflow-hidden border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] group/final bg-black"
+                                >
+                                    <video 
+                                        src={scene.finalVideoUrl} 
+                                        className="w-full h-full object-contain"
+                                        controls
+                                    />
+                                    <div className="absolute top-6 right-6 flex gap-3 opacity-0 group-hover/final:opacity-100 transition-opacity">
+                                        <button 
+                                            onClick={() => window.open(scene.finalVideoUrl, '_blank')}
+                                            className="p-3 bg-black/60 backdrop-blur-xl border border-white/10 rounded-full text-white hover:bg-[#e2a9f1] hover:text-black transition-all"
+                                        >
+                                            <Download className="w-5 h-5" />
+                                        </button>
+                                    </div>
+                                    <div className="absolute inset-x-0 bottom-0 p-8 bg-gradient-to-t from-black via-black/40 to-transparent">
+                                        <div className="flex items-center justify-between">
+                                            <div className="space-y-1">
+                                                <div className="text-[10px] font-black text-[#e2a9f1] uppercase tracking-[0.3em]">Scène Complète</div>
+                                                <h3 className="text-xl font-black text-white uppercase">{scene.title}</h3>
+                                            </div>
+                                            <div className="px-4 py-2 bg-white text-black text-[10px] font-black rounded-lg uppercase tracking-widest flex items-center gap-2">
+                                                <Check className="w-3 h-3" /> Production Terminée
+                                            </div>
+                                        </div>
+                                    </div>
+                                </m.div>
+                            ) : isCompiling ? (
+                                <div className="aspect-video rounded-[3rem] border-2 border-dashed border-[#e2a9f1]/20 flex flex-col items-center justify-center space-y-6 bg-[#e2a9f1]/5">
+                                    <div className="relative w-20 h-20">
+                                        <m.div 
+                                            animate={{ rotate: 360 }}
+                                            transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                                            className="absolute inset-0 border-4 border-[#e2a9f1] border-t-transparent rounded-full shadow-[0_0_30px_rgba(226,169,241,0.2)]"
+                                        />
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <Cpu className="w-8 h-8 text-[#e2a9f1] animate-pulse" />
+                                        </div>
+                                    </div>
+                                    <div className="text-center space-y-2">
+                                        <div className="text-sm font-black text-white uppercase tracking-[0.2em] animate-pulse">Compilation FFmpeg en cours</div>
+                                        <p className="text-xs text-gray-500 font-medium">Assemblage des segments, normalisation et rendu final...</p>
+                                    </div>
+                                </div>
+                            ) : null}
+
+                            {scene?.compilationStatus === 'failed' && (
+                                <div className="p-6 bg-red-500/10 border border-red-500/20 rounded-3xl flex items-center gap-4 text-red-500">
+                                    <AlertCircle className="w-6 h-6 shrink-0" />
+                                    <div>
+                                        <div className="text-xs font-black uppercase tracking-widest">Échec de la compilation</div>
+                                        <div className="text-[11px] font-medium opacity-80 mt-1">{scene.compilationError || 'Une erreur inconnue est survenue.'}</div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
@@ -319,28 +499,81 @@ export default function StudioShotsStoryboard({ params }: { params: { id: string
                                         <div className="w-[280px] bg-black relative flex items-center justify-center shrink-0 overflow-hidden border-r border-gray-800">
                                             {segment.generationStatus === 'completed' ? (
                                                 <div className="w-full h-full relative group/play">
-                                                    <div className="absolute inset-0 bg-[#e2a9f1]/5 flex items-center justify-center">
-                                                        <Film className="w-12 h-12 text-[#e2a9f1]/20" />
-                                                    </div>
+                                                    {(segment as any).videoUrl ? (
+                                                        <video 
+                                                            src={(segment as any).videoUrl} 
+                                                            className="w-full h-full object-cover"
+                                                            muted
+                                                            playsInline
+                                                            onMouseOver={e => (e.target as HTMLVideoElement).play()}
+                                                            onMouseOut={e => {
+                                                                (e.target as HTMLVideoElement).pause();
+                                                                (e.target as HTMLVideoElement).currentTime = 0;
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <div className="absolute inset-0 bg-[#e2a9f1]/5 flex items-center justify-center">
+                                                            <Film className="w-12 h-12 text-[#e2a9f1]/20" />
+                                                        </div>
+                                                    )}
                                                     <div className="absolute inset-0 bg-black/40 group-hover/play:bg-black/10 transition-colors flex items-center justify-center">
-                                                        <button className="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center shadow-2xl transition-transform group-hover/play:scale-110 active:scale-95">
+                                                        <button 
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                if ((segment as any).videoUrl) window.open((segment as any).videoUrl, '_blank');
+                                                            }}
+                                                            className="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center shadow-2xl transition-transform group-hover/play:scale-110 active:scale-95"
+                                                        >
                                                             <Play className="w-6 h-6 ml-1" fill="black" />
                                                         </button>
                                                     </div>
                                                 </div>
                                             ) : segment.generationStatus === 'generating' ? (
-                                                <div className="flex flex-col items-center justify-center space-y-4">
+                                                <div className="flex flex-col items-center justify-center space-y-6 w-full px-8">
                                                     <div className="relative w-16 h-16">
                                                         <m.div 
                                                             animate={{ rotate: 360 }}
                                                             transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                                                            className="absolute inset-0 border-2 border-t-[#e2a9f1] border-transparent rounded-full"
+                                                            className="absolute inset-0 border-2 border-t-[#e2a9f1] border-transparent rounded-full shadow-[0_0_15px_rgba(226,169,241,0.2)]"
                                                         />
                                                         <div className="absolute inset-0 flex items-center justify-center">
                                                             <Cpu className="w-6 h-6 text-[#e2a9f1] animate-pulse" />
                                                         </div>
                                                     </div>
-                                                    <div className="text-[10px] text-[#e2a9f1] font-black uppercase tracking-widest animate-pulse">Sora Generative Engine...</div>
+                                                    
+                                                    <div className="w-full space-y-3">
+                                                        <div className="flex justify-between items-center px-1">
+                                                            <div className="text-[10px] text-[#e2a9f1] font-black uppercase tracking-widest animate-pulse">
+                                                                {segment.progress < 20 ? 'Initialisation...' : 
+                                                                 segment.progress < 60 ? 'Génération en cours...' :
+                                                                 segment.progress < 90 ? 'Rendu des détails...' :
+                                                                 segment.progress < 100 ? 'Finalisation...' : 'Terminé'}
+                                                            </div>
+                                                            <div className="text-[10px] text-gray-500 font-mono font-bold">{segment.progress || 0}%</div>
+                                                        </div>
+                                                        
+                                                        <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden border border-white/5 relative p-[1px]">
+                                                            <m.div 
+                                                                initial={{ width: 0 }}
+                                                                animate={{ width: `${segment.progress || 0}%` }}
+                                                                transition={{ duration: 1, ease: "circOut" }}
+                                                                className="h-full bg-gradient-to-r from-[#e2a9f1] via-[#ff80b5] to-[#e2a9f1] bg-[length:200%_100%] animate-gradient shadow-[0_0_12px_rgba(226,169,241,0.4)] rounded-full"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ) : segment.generationStatus === 'failed' ? (
+                                                <div className="flex flex-col items-center justify-center space-y-4 px-6 text-center">
+                                                    <div className="w-12 h-12 bg-red-500/10 rounded-2xl flex items-center justify-center border border-red-500/20">
+                                                        <AlertCircle className="w-6 h-6 text-red-500" />
+                                                    </div>
+                                                    <div className="text-[10px] uppercase font-black tracking-widest text-red-500">Erreur Production</div>
+                                                    <button 
+                                                        onClick={() => handleGenerateSegmentVideo(segment.segmentId)}
+                                                        className="text-[9px] text-gray-400 underline uppercase tracking-tighter"
+                                                    >
+                                                        Réessayer
+                                                    </button>
                                                 </div>
                                             ) : (
                                                 <div className="flex flex-col items-center justify-center space-y-4 opacity-40 group-hover:opacity-100 transition-opacity">
@@ -385,16 +618,18 @@ export default function StudioShotsStoryboard({ params }: { params: { id: string
                                                 
                                                 <button 
                                                     onClick={() => handleGenerateSegmentVideo(segment.segmentId)}
-                                                    disabled={segment.generationStatus === 'generating' || segment.generationStatus === 'completed'}
+                                                    disabled={segment.generationStatus === 'generating'}
                                                     className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl active:scale-95 ${
                                                         segment.generationStatus === 'completed' 
-                                                        ? 'bg-green-500 text-black shadow-green-500/20' 
+                                                        ? 'bg-green-500 text-black shadow-green-500/20 hover:scale-105' 
                                                         : segment.generationStatus === 'generating'
                                                         ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                                                        : segment.generationStatus === 'failed'
+                                                        ? 'bg-red-500/80 text-white hover:bg-red-500'
                                                         : 'bg-white text-black hover:rotate-1'
                                                     }`}
                                                 >
-                                                    {segment.generationStatus === 'completed' ? 'Télécharger' : segment.generationStatus === 'generating' ? 'Génération...' : 'Lancer Production Sora'}
+                                                    {segment.generationStatus === 'completed' ? 'Télécharger' : segment.generationStatus === 'generating' ? 'Génération...' : segment.generationStatus === 'failed' ? 'Réessayer Sora' : 'Lancer Production Sora'}
                                                 </button>
                                             </div>
                                         </div>

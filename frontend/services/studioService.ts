@@ -207,3 +207,21 @@ export const generateSegmentVideo = async (segmentId: string, provider: string =
         throw new Error('Erreur de connexion au serveur.');
     }
 };
+/**
+ * Compile tous les segments d'une scène en une seule vidéo finale.
+ */
+export const compileSceneVideo = async (sceneId: string) => {
+    try {
+        const response = await axios.post(
+            `${API_URL}/studio/scenes/${sceneId}/compile-video`,
+            {},
+            { headers: getAuthHeaders() }
+        );
+        return response.data;
+    } catch (error: any) {
+        if (error.response && error.response.data) {
+            throw new Error(error.response.data.message || 'Erreur lors de la compilation de la scène.');
+        }
+        throw new Error('Erreur de connexion au serveur.');
+    }
+};
