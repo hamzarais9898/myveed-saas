@@ -3,23 +3,23 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    ChevronLeft,
-    Scissors,
-    Clock,
-    Users,
-    Play,
-    Settings2,
-    Sparkles,
-    Video,
+import { 
+    ChevronLeft, 
+    Scissors, 
+    Clock, 
+    Users, 
+    Play, 
+    Settings2, 
+    Sparkles, 
+    Video, 
     Clapperboard,
-    AlertCircle
+    AlertCircle 
 } from 'lucide-react';
 import { getStudioEpisode, generateStudioScenes } from '@/services/studioService';
 
 export default function StudioEpisodeView({ params }: { params: { id: string } }) {
     const router = useRouter();
-
+    
     // States réels
     const [episode, setEpisode] = useState<any>(null);
     const [scenes, setScenes] = useState<any[]>([]);
@@ -35,7 +35,7 @@ export default function StudioEpisodeView({ params }: { params: { id: string } }
             if (data.success) {
                 setEpisode(data.episode);
                 setScenes(data.scenes);
-
+                
                 // Si l'épisode vient de passer en "scenes_generated", on arrête le loader
                 if (data.episode.status !== 'draft') {
                     setIsGenerating(false);
@@ -94,7 +94,7 @@ export default function StudioEpisodeView({ params }: { params: { id: string } }
         <div className="max-w-5xl mx-auto pb-20">
             {/* Breadcrumb / Top Bar */}
             <div className="flex items-center gap-4 mb-4">
-                <button
+                <button 
                     onClick={() => {
                         if (episode?.seasonId) {
                             router.push(`/studio/season/${episode.seasonId}`);
@@ -123,14 +123,14 @@ export default function StudioEpisodeView({ params }: { params: { id: string } }
             )}
 
             {/* Episode Header Block */}
-            <motion.div
+            <motion.div 
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="bg-[#151521] border border-[#e2a9f1]/20 rounded-3xl p-8 sm:p-10 shadow-[0_0_50px_-15px_rgba(226,169,241,0.2)] relative overflow-hidden mb-12"
             >
                 <div className="absolute top-0 right-0 w-64 h-64 bg-[#e2a9f1]/5 rounded-full blur-[80px]" />
                 <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#c77ddf]/5 rounded-full blur-[80px]" />
-
+                
                 <div className="relative z-10 grid lg:grid-cols-2 gap-8 items-center">
                     <div>
                         <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl mb-6 shadow-inner">
@@ -142,7 +142,7 @@ export default function StudioEpisodeView({ params }: { params: { id: string } }
                         <p className="text-gray-300 text-lg mb-6 leading-relaxed">
                             {episode.summary}
                         </p>
-
+                        
                         <div className="flex flex-wrap gap-4">
                             <div className="flex items-center gap-2 px-4 py-2 bg-black/40 border border-gray-800 rounded-xl text-sm text-gray-400">
                                 <Clock className="w-4 h-4 text-gray-500" /> {episode.duration}
@@ -161,8 +161,8 @@ export default function StudioEpisodeView({ params }: { params: { id: string } }
                         <p className="text-sm text-gray-400 mb-6">
                             L'IA va maintenant analyser l'épisode et le découper en scènes prêtes pour le tournage virtuel.
                         </p>
-
-                        <button
+                        
+                        <button 
                             onClick={handleCutScenes}
                             disabled={isGenerating || hasScenes}
                             className="w-full flex items-center justify-center gap-2 py-4 px-6 bg-gradient-to-r from-white to-gray-200 text-black font-black uppercase tracking-widest text-sm rounded-2xl hover:scale-105 transition-all shadow-[0_0_20px_rgba(255,255,255,0.2)] disabled:opacity-50 disabled:pointer-events-none disabled:bg-gray-800 disabled:text-gray-400"
@@ -188,7 +188,7 @@ export default function StudioEpisodeView({ params }: { params: { id: string } }
             {/* Scenes Section */}
             <AnimatePresence>
                 {hasScenes && (
-                    <motion.div
+                    <motion.div 
                         initial={{ opacity: 0, y: 40 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
@@ -197,13 +197,13 @@ export default function StudioEpisodeView({ params }: { params: { id: string } }
                     >
                         <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-800">
                             <h2 className="text-3xl font-black text-white flex items-center gap-3">
-                                <Clapperboard className="text-[#e2a9f1]" />
+                                <Clapperboard className="text-[#e2a9f1]" /> 
                                 Scénario Technique ({scenes.length})
                             </h2>
                         </div>
 
                         {scenes.map((scene, idx) => (
-                            <motion.div
+                            <motion.div 
                                 key={scene.sceneId}
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
@@ -211,7 +211,7 @@ export default function StudioEpisodeView({ params }: { params: { id: string } }
                                 className="group relative bg-[#151521] border border-gray-800 rounded-3xl p-6 sm:p-8 hover:border-[#e2a9f1]/50 transition-colors shadow-lg"
                             >
                                 <div className="absolute left-0 top-0 bottom-0 w-2 bg-gray-800 group-hover:bg-[#e2a9f1] rounded-l-3xl transition-colors" />
-
+                                
                                 <div className="grid md:grid-cols-4 gap-6 items-center w-full pl-4">
                                     {/* Info Panel */}
                                     <div className="md:col-span-3">
@@ -221,19 +221,19 @@ export default function StudioEpisodeView({ params }: { params: { id: string } }
                                             </span>
                                             <span className="text-gray-500 text-sm"> • {scene.estimatedDuration} estim.</span>
                                         </div>
-
+                                        
                                         <h3 className="text-2xl font-bold text-white mb-2">{scene.title}</h3>
                                         <p className="text-gray-400 leading-relaxed mb-4">{scene.description}</p>
-
+                                        
                                         <div className="flex flex-wrap gap-2 text-xs">
                                             <span className="px-3 py-1.5 border border-gray-800 rounded-lg text-gray-300 font-medium">Ambiance: {scene.mood}</span>
                                             <span className="px-3 py-1.5 border border-gray-800 rounded-lg text-gray-300 font-medium whitespace-pre-wrap">Perso(s): {scene.characters?.join(', ')}</span>
                                         </div>
                                     </div>
-
+                                    
                                     {/* Action button */}
                                     <div className="md:col-span-1 flex md:flex-col justify-end gap-3 h-full pt-4 md:pt-0 border-t border-gray-800 md:border-t-0 md:border-l md:pl-6">
-                                        <button
+                                        <button 
                                             onClick={() => router.push(`/studio/scene/${scene.sceneId}/shots`)}
                                             className="w-full flex items-center justify-center gap-2 py-4 px-6 bg-gradient-to-r from-[#e2a9f1] to-[#c77ddf] text-black font-black rounded-2xl shadow-lg hover:shadow-[0_0_20px_rgba(226,169,241,0.4)] transition-all active:scale-95"
                                         >
