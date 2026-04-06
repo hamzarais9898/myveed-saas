@@ -34,6 +34,8 @@ export default function Navbar() {
         instagram: false
     });
 
+    const hasConnectedPlatforms = connectedPlatforms && Object.values(connectedPlatforms).some(Boolean);
+
     useEffect(() => {
         const checkConnections = async () => {
             try {
@@ -130,47 +132,7 @@ export default function Navbar() {
 
                         {/* Desktop Navigation */}
                         <div className="hidden lg:flex items-center space-x-4">
-                            {/* Platforms Status */}
-                            {(connectedPlatforms.tiktok || connectedPlatforms.youtube || connectedPlatforms.instagram) ? (
-                                <Link href="/platforms" className="flex items-center gap-2 mr-2 group">
-                                    <div className="flex -space-x-2 hover:space-x-1 transition-all">
-                                        {connectedPlatforms.tiktok && (
-                                            <motion.div
-                                                initial={{ scale: 0, opacity: 0 }}
-                                                animate={{ scale: 1, opacity: 1 }}
-                                                className="relative z-30"
-                                            >
-                                                <div className="w-9 h-9 rounded-full bg-black flex items-center justify-center text-white shadow-lg border-2 border-white">
-                                                    <TikTokIcon className="w-4 h-4" />
-                                                </div>
-                                                <span className="absolute top-0 right-0 flex h-2.5 w-2.5">
-                                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                                                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500 border-2 border-white"></span>
-                                                </span>
-                                            </motion.div>
-                                        )}
-                                        {/* Placeholders for YouTube/Insta if connected later */}
-                                    </div>
-                                    <div className="hidden group-hover:block px-2 py-1 bg-green-50 text-green-600 text-[10px] font-black uppercase rounded-lg border border-green-100 animate-in fade-in slide-in-from-left-1">
-                                        Connecté
-                                    </div>
-                                </Link>
-                            ) : (
-                                <Link href="/platforms" className="mr-2">
-                                    <motion.button
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        className="flex items-center gap-2 px-4 py-2 bg-white text-gray-900 border border-gray-200 rounded-xl shadow-sm hover:bg-gray-50 transition-all"
-                                    >
-                                        <div className="flex items-center -space-x-1">
-                                            <TikTokIcon className="w-3 h-3" />
-                                            <YouTubeIcon className="w-3 h-3" />
-                                            <InstagramIcon className="w-3 h-3" />
-                                        </div>
-                                        <span className="text-xs font-bold">{t('common.nav.platforms')}</span>
-                                    </motion.button>
-                                </Link>
-                            )}
+
 
                             {/* Stars - Single Link */}
                             <Link
@@ -265,6 +227,35 @@ export default function Navbar() {
 
                         {/* Right Section */}
                         <div className="hidden lg:flex items-center space-x-3">
+                            {/* Platforms Access - New Position */}
+                            <Link href="/platforms" className="flex-shrink-0">
+                                {hasConnectedPlatforms ? (
+                                    <motion.div
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        className="flex items-center gap-2 px-2.5 py-1.5 bg-gray-50/80 backdrop-blur-sm border border-gray-200 rounded-full hover:border-[#e2a9f1]/50 transition-all cursor-pointer group"
+                                    >
+                                        <div className="flex -space-x-1.5 group-hover:-space-x-0.5 transition-all">
+                                            {connectedPlatforms.tiktok && <div className="w-5 h-5 rounded-full bg-black flex items-center justify-center border border-white shadow-sm"><TikTokIcon className="w-2.5 h-2.5 text-white" /></div>}
+                                            {connectedPlatforms.youtube && <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center border border-white shadow-sm"><YouTubeIcon className="w-2.5 h-2.5 text-[#FF0000]" /></div>}
+                                            {connectedPlatforms.instagram && <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center border border-white shadow-sm"><InstagramIcon className="w-2.5 h-2.5 text-[#E1306C]" /></div>}
+                                        </div>
+                                        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse border border-white shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
+                                    </motion.div>
+                                ) : (
+                                    <motion.div
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        className="flex items-center gap-2 px-3 py-1.5 bg-white text-gray-700 border border-gray-200 rounded-full shadow-sm hover:border-[#e2a9f1] hover:text-[#c77ddf] transition-all cursor-pointer"
+                                    >
+                                        <Music className="w-3.5 h-3.5" />
+                                        <span className="text-xs font-bold whitespace-nowrap">
+                                            {t('common.nav.platforms') || 'Lier plateformes'}
+                                        </span>
+                                    </motion.div>
+                                )}
+                            </Link>
+
                             {/* Credits Badge */}
                             {subscription && (
                                 <Link href="/subscriptions">
