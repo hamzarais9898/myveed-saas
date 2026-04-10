@@ -93,9 +93,7 @@ export default function Navbar() {
     }
 
     const createItems: NavItem[] = [
-        { href: '/shorts', label: t('common.nav.shorts'), icon: Video },
         { href: '/generate', label: t('common.nav.generate'), icon: Wand2 },
-        { href: '/text-to-speech', label: t('common.nav.tts'), icon: Mic },
         { href: '/image-fusion', label: t('common.nav.imageFusion') || 'Fusion d\'images', icon: Sparkles },
         // { href: '/create-influencer', label: t('features.influencers.title'), icon: Users, badge: true },
     ];
